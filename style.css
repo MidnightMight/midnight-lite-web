@@ -95,7 +95,7 @@ body {
 
 /* Title Styling */
 .container h1 {
-    font-size: 6vw; /* Dynamic font size for larger screens */
+    font-size: 5vw; /* Dynamic font size for larger screens */
     margin-bottom: 20px;
 }
 
