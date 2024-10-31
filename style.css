@@ -1,0 +1,93 @@
+/* Base Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Background Styling */
+body {
+    background: url('_X100068.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+    text-align: center;
+}
+
+/* Main Container */
+.container {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+}
+
+/* Title */
+h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+/* Countdown Timer */
+.countdown {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.time {
+    font-size: 36px;
+}
+
+.label {
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-top: -10px;
+}
+
+/* Buttons and Form */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #e64a19;
+}
+
+form {
+    margin-top: 20px;
+}
+
+input[type="email"] {
+    padding: 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.description {
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #bbb;
+}
