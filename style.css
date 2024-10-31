@@ -1,4 +1,29 @@
-/* Base Reset */
+/* Curved Box Styling for Countdown */
+.countdown-box {
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle background color */
+    padding: 20px;
+    border-radius: 15px; /* Rounded corners */
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.countdown-box .countdown {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.countdown-box .time {
+    font-size: 36px;
+}
+
+.countdown-box .label {
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-top: -10px;
+}
+
+/* Reset and Base Styling */
 * {
     margin: 0;
     padding: 0;
@@ -10,12 +35,48 @@
 body {
     background: url('_X100068.jpg') no-repeat center center fixed;
     background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     color: white;
     text-align: center;
+    padding-top: 60px; /* Offset for the fixed top bar */
+}
+
+/* Top Bar Menu */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #333;
+    color: white;
+    padding: 15px 30px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.topbar .logo a {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+.topbar .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+}
+
+.topbar .nav-links li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    transition: background 0.3s;
+}
+
+.topbar .nav-links li a:hover {
+    background-color: #555;
+    border-radius: 5px;
 }
 
 /* Main Container */
@@ -24,37 +85,60 @@ body {
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    max-width: 400px;
-}
-
-/* Title */
-h1 {
-    font-size: 48px;
-    margin-bottom: 20px;
-}
-
-/* Countdown Timer */
-.countdown {
+    max-width: 600px; /* Increased max-width for larger screens */
+    width: 90%; /* Responsive width */
+    margin: auto;
     display: flex;
-    justify-content: center;
-    gap: 15px;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Title Styling */
+.container h1 {
+    font-size: 6vw; /* Dynamic font size for larger screens */
     margin-bottom: 20px;
 }
 
-.time {
-    font-size: 36px;
+/* Curved Box Styling for Countdown */
+.countdown-box {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 600px;
 }
 
-.label {
-    font-size: 12px;
+/* Countdown Timer Styling */
+.countdown-box .countdown {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 10px;
+}
+
+.countdown-box .time {
+    font-size: calc(2vw + 10px); /* Dynamic font size */
+    min-width: 60px; /* Minimum width to keep each time unit compact */
+    max-width: 100px; /* Maximum width to ensure all units fit in one line */
+    text-align: center;
+    flex: 1; /* Flexible sizing to fit within the row */
+}
+
+.countdown-box .label {
+    font-size: calc(0.8vw + 8px); /* Smaller responsive font size for labels */
     text-transform: uppercase;
     margin-top: -10px;
+    text-align: center;
+    flex: 1;
 }
 
-/* Buttons and Form */
-button {
-    padding: 10px 20px;
-    font-size: 16px;
+/* Button Styling */
+.container button,
+.container form button {
+    padding: 1vw 2vw; /* Responsive padding */
+    font-size: 2vw; /* Responsive font size */
     background-color: #ff5722;
     color: white;
     border: none;
@@ -64,30 +148,149 @@ button {
     margin-top: 10px;
 }
 
-button:hover {
+.container button:hover,
+.container form button:hover {
     background-color: #e64a19;
 }
 
-form {
+/* Form Styling */
+.container form {
     margin-top: 20px;
+    width: 100%;
 }
 
-input[type="email"] {
+.container form input[type="email"] {
     padding: 10px;
-    font-size: 14px;
+    font-size: 1.5vw; /* Responsive font size */
     border: none;
     border-radius: 5px;
     width: 100%;
     margin-top: 10px;
 }
 
-.description {
+/* Additional Text */
+.container .description {
     margin-top: 20px;
-    font-size: 16px;
+    font-size: 2vw; /* Responsive font size */
+    text-align: center;
 }
 
-footer {
+.container footer {
     margin-top: 20px;
-    font-size: 12px;
+    font-size: 1.5vw; /* Responsive font size */
     color: #bbb;
+}
+
+/* Background Animation Overlay */
+.background-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1; /* Keeps it behind other content */
+    pointer-events: none; /* Allows user interaction only with main content */
+}
+
+/* Keyframe Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(0.5);
+        opacity: 0.3;
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(30px, -30px);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes colorChange {
+    0% {
+        background-color: rgba(255, 99, 71, 0.3); /* Tomato */
+    }
+    25% {
+        background-color: rgba(135, 206, 250, 0.3); /* LightSkyBlue */
+    }
+    50% {
+        background-color: rgba(144, 238, 144, 0.3); /* LightGreen */
+    }
+    75% {
+        background-color: rgba(238, 130, 238, 0.3); /* Violet */
+    }
+    100% {
+        background-color: rgba(255, 99, 71, 0.3); /* Return to Tomato */
+    }
+}
+
+/* Styling for Each Circle */
+.background-animation .circle {
+    position: absolute;
+    border-radius: 50%;
+    animation: pulse 3s infinite ease-in-out, float 8s infinite alternate ease-in-out, colorChange 6s infinite ease-in-out;
+}
+
+/* Position and Size Variants for Each Circle */
+.background-animation .circle:nth-child(1) {
+    width: 100px;
+    height: 100px;
+    top: 10%;
+    left: 20%;
+    animation-duration: 4s, 10s, 8s;
+}
+
+.background-animation .circle:nth-child(2) {
+    width: 120px;
+    height: 120px;
+    top: 40%;
+    left: 70%;
+    animation-duration: 3s, 8s, 6s;
+}
+
+.background-animation .circle:nth-child(3) {
+    width: 80px;
+    height: 80px;
+    top: 60%;
+    left: 30%;
+    animation-duration: 5s, 12s, 9s;
+}
+
+.background-animation .circle:nth-child(4) {
+    width: 140px;
+    height: 140px;
+    top: 20%;
+    left: 80%;
+    animation-duration: 6s, 9s, 7s;
+}
+
+.background-animation .circle:nth-child(5) {
+    width: 60px;
+    height: 60px;
+    top: 75%;
+    left: 50%;
+    animation-duration: 4s, 11s, 8s;
+}
+
+.background-animation .circle:nth-child(6) {
+    width: 110px;
+    height: 110px;
+    top: 30%;
+    left: 40%;
+    animation-duration: 5s, 7s, 10s;
 }
