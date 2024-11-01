@@ -6,7 +6,8 @@
     margin-bottom: 2vh;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     width: 100%;
-    max-width: 90%;
+    max-width: 50%;
+    min-width: fit-content;
 }
 
 .countdown-box .countdown {
@@ -92,7 +93,8 @@ body {
     border-radius: 1vw;
     box-shadow: 0 0 2vw rgba(0, 0, 0, 0.5);
     max-width: 90vw;
-    width: 90%;
+    width: 50%;
+    min-width: fit-content;
     margin: auto;
     display: flex;
     flex-direction: column;
