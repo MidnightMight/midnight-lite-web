@@ -1,27 +1,33 @@
 /* Curved Box Styling for Countdown */
 .countdown-box {
     background-color: rgba(255, 255, 255, 0.1); /* Subtle background color */
-    padding: 20px;
-    border-radius: 15px; /* Rounded corners */
-    margin-bottom: 20px;
+    padding: 2vw;
+    border-radius: 1.5vw;
+    margin-bottom: 2vh;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 50%;
+    min-width: fit-content;
 }
 
 .countdown-box .countdown {
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 2vw;
 }
 
 .countdown-box .time {
-    font-size: 36px;
+    font-size: calc(2vw + 1rem); /* Dynamic font size */
+    text-align: center;
+    flex: 1;
 }
 
+/* Label Styling for Countdown */
 .countdown-box .label {
-    font-size: 10px;
-    text-transform: none;
+    font-size: calc(0.4vw + 0.4rem); /* Responsive font size */
+    text-transform: uppercase;
     text-align: center;
-    margin-top: -10px;
+    margin-top: 0; /* Remove superscript effect by setting margin-top to zero */
 }
 
 /* Reset and Base Styling */
@@ -34,11 +40,38 @@
 
 /* Background Styling */
 body {
-    background: url('_X100068.jpg') no-repeat center center fixed;
+    background-color: azure;
     background-size: cover;
-    color: white;
+    color: lightblue;
     text-align: center;
-    padding-top: 60px; /* Offset for the fixed top bar */
+    padding-top: 5vh;
+}
+
+/* Footer */
+.footer {
+    background-color: #333;
+    color: white;
+    padding: 1vh 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Parallax Background Image */
+
+
+.parallax {
+    /* The image used */
+    background-image: url('_X100068.webp');
+
+    /* Set a specific height */
+    height: 40vh;
+
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 /* Top Bar Menu */
@@ -48,15 +81,15 @@ body {
     justify-content: space-between;
     background-color: #333;
     color: white;
-    padding: 15px 30px;
-    position: fixed;
+    padding: 1vh 3vw;
+    position: sticky;
     top: 0;
     width: 100%;
     z-index: 1000;
 }
 
 .topbar .logo a {
-    font-size: 24px;
+    font-size: 3vw;
     font-weight: bold;
     color: white;
     text-decoration: none;
@@ -65,29 +98,32 @@ body {
 .topbar .nav-links {
     list-style: none;
     display: flex;
-    gap: 15px;
+    gap: 2vw;
 }
 
 .topbar .nav-links li a {
     color: white;
     text-decoration: none;
-    padding: 10px;
+    padding: 1vh 1vw;
     transition: background 0.3s;
 }
 
 .topbar .nav-links li a:hover {
     background-color: #555;
-    border-radius: 5px;
+    border-radius: 0.5vw;
 }
 
 /* Main Container */
 .container {
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    max-width: 600px; /* Increased max-width for larger screens */
-    width: 90%; /* Responsive width */
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 3vw;
+    border-radius: 1vw;
+    box-shadow: 0 0 2vw rgba(0, 0, 0, 0.65);
+    max-width: 65vw;
+    width: auto;
+    min-width: -webkit-fit-content;
+    min-width: -moz-fit-content;
+    min-width: fit-content;
     margin: auto;
     display: flex;
     flex-direction: column;
@@ -96,57 +132,22 @@ body {
 
 /* Title Styling */
 .container h1 {
-    font-size: 6vw; /* Dynamic font size for larger screens */
-    margin-bottom: 20px;
-}
-
-/* Curved Box Styling for Countdown */
-.countdown-box {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    width: 100%;
-    max-width: 600px;
-}
-
-/* Countdown Timer Styling */
-.countdown-box .countdown {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    gap: 10px;
-}
-
-.countdown-box .time {
-    font-size: calc(2vw + 10px); /* Dynamic font size */
-    min-width: 60px; /* Minimum width to keep each time unit compact */
-    max-width: 100px; /* Maximum width to ensure all units fit in one line */
-    text-align: center;
-    flex: 1; /* Flexible sizing to fit within the row */
-}
-
-.countdown-box .label {
-    font-size: calc(0.8vw + 8px); /* Smaller responsive font size for labels */
-    text-transform: uppercase;
-    margin-top: -10px;
-    text-align: center;
-    flex: 1;
+    font-size: 5vw;
+    margin-bottom: 2vh;
 }
 
 /* Button Styling */
 .container button,
 .container form button {
-    padding: 1vw 2vw; /* Responsive padding */
-    font-size: 2vw; /* Responsive font size */
+    padding: 1vh 2vw;
+    font-size: 2vw;
     background-color: #ff5722;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 0.5vw;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin-top: 10px;
+    margin-top: 1vh;
 }
 
 .container button:hover,
@@ -156,29 +157,29 @@ body {
 
 /* Form Styling */
 .container form {
-    margin-top: 20px;
+    margin-top: 2vh;
     width: 100%;
 }
 
 .container form input[type="email"] {
-    padding: 10px;
-    font-size: 1.5vw; /* Responsive font size */
+    padding: 1.5vh;
+    font-size: 1.5vw;
     border: none;
-    border-radius: 5px;
+    border-radius: 0.5vw;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 1vh;
 }
 
 /* Additional Text */
 .container .description {
-    margin-top: 20px;
-    font-size: 2vw; /* Responsive font size */
+    margin-top: 2vh;
+    font-size: 2vw;
     text-align: center;
 }
 
 .container footer {
-    margin-top: 20px;
-    font-size: 1.5vw; /* Responsive font size */
+    margin-top: 2vh;
+    font-size: 1.5vw;
     color: #bbb;
 }
 
@@ -190,8 +191,8 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    z-index: -1; /* Keeps it behind other content */
-    pointer-events: none; /* Allows user interaction only with main content */
+    z-index: -1;
+    pointer-events: none;
 }
 
 /* Keyframe Animations */
@@ -215,7 +216,7 @@ body {
         transform: translate(0, 0);
     }
     50% {
-        transform: translate(30px, -30px);
+        transform: translate(3vw, -3vh);
     }
     100% {
         transform: translate(0, 0);
@@ -249,49 +250,120 @@ body {
 
 /* Position and Size Variants for Each Circle */
 .background-animation .circle:nth-child(1) {
-    width: 100px;
-    height: 100px;
+    width: 10vw;
+    height: 10vw;
     top: 10%;
     left: 20%;
     animation-duration: 4s, 10s, 8s;
 }
 
 .background-animation .circle:nth-child(2) {
-    width: 120px;
-    height: 120px;
+    width: 12vw;
+    height: 12vw;
     top: 40%;
     left: 70%;
     animation-duration: 3s, 8s, 6s;
 }
 
 .background-animation .circle:nth-child(3) {
-    width: 80px;
-    height: 80px;
+    width: 8vw;
+    height: 8vw;
     top: 60%;
     left: 30%;
     animation-duration: 5s, 12s, 9s;
 }
 
 .background-animation .circle:nth-child(4) {
-    width: 140px;
-    height: 140px;
+    width: 14vw;
+    height: 14vw;
     top: 20%;
     left: 80%;
     animation-duration: 6s, 9s, 7s;
 }
 
 .background-animation .circle:nth-child(5) {
-    width: 60px;
-    height: 60px;
+    width: 6vw;
+    height: 6vw;
     top: 75%;
     left: 50%;
     animation-duration: 4s, 11s, 8s;
 }
 
 .background-animation .circle:nth-child(6) {
-    width: 110px;
-    height: 110px;
+    width: 11vw;
+    height: 11vw;
     top: 30%;
     left: 40%;
     animation-duration: 5s, 7s, 10s;
+}
+.content {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Banner */
+.banner {
+    background-color: #333;
+    color: white;
+    padding: 1vh 0;
+    text-align: center;
+}
+
+.banner h1 {
+    font-size: 3vw;
+}
+
+.banner p {
+    font-size: 1.5vw;
+}
+
+/* carousel */
+
+.carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    gap: 1vw;
+    padding: 1vw;
+    margin-top: 2vh;
+}
+
+.carousel img {
+    scroll-snap-align: start;
+    border-radius: 1vw;
+    width: 33vw;
+    height: 15vw;
+    object-fit: cover;
+}
+
+.carousel .item {
+    scroll-snap-align: start;
+    
+}
+
+.carousel-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1vh;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    padding: 1vh 2vw; /* Add padding */
+    border-radius: 0.5vw; /* Rounded corners */
+    color: white; /* Text color */
+    font-size: 1.5vw; /* Increase font size */
+}
+
+.carousel-controls button {
+    background-color: #ff5722; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove border */
+    padding: 1vh 2vw; /* Add padding */
+    border-radius: 0.5vw; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.carousel-controls button:hover {
+    background-color: #e64a19; /* Darker background on hover */
 }
