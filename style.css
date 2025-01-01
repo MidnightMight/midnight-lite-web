@@ -40,11 +40,38 @@
 
 /* Background Styling */
 body {
-    background: url('_X100068.jpg') no-repeat center center fixed;
+    background-color: azure;
     background-size: cover;
-    color: white;
+    color: lightblue;
     text-align: center;
-    padding-top: 10vh;
+    padding-top: 5vh;
+}
+
+/* Footer */
+.footer {
+    background-color: #333;
+    color: white;
+    padding: 1vh 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Parallax Background Image */
+
+
+.parallax {
+    /* The image used */
+    background-image: url('_X100068.webp');
+
+    /* Set a specific height */
+    height: 40vh;
+
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 /* Top Bar Menu */
@@ -55,7 +82,7 @@ body {
     background-color: #333;
     color: white;
     padding: 1vh 3vw;
-    position: fixed;
+    position: sticky;
     top: 0;
     width: 100%;
     z-index: 1000;
@@ -88,12 +115,14 @@ body {
 
 /* Main Container */
 .container {
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.85);
     padding: 3vw;
     border-radius: 1vw;
-    box-shadow: 0 0 2vw rgba(0, 0, 0, 0.5);
-    max-width: 90vw;
-    width: 50%;
+    box-shadow: 0 0 2vw rgba(0, 0, 0, 0.65);
+    max-width: 65vw;
+    width: auto;
+    min-width: -webkit-fit-content;
+    min-width: -moz-fit-content;
     min-width: fit-content;
     margin: auto;
     display: flex;
@@ -266,4 +295,75 @@ body {
     top: 30%;
     left: 40%;
     animation-duration: 5s, 7s, 10s;
+}
+.content {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Banner */
+.banner {
+    background-color: #333;
+    color: white;
+    padding: 1vh 0;
+    text-align: center;
+}
+
+.banner h1 {
+    font-size: 3vw;
+}
+
+.banner p {
+    font-size: 1.5vw;
+}
+
+/* carousel */
+
+.carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    gap: 1vw;
+    padding: 1vw;
+    margin-top: 2vh;
+}
+
+.carousel img {
+    scroll-snap-align: start;
+    border-radius: 1vw;
+    width: 33vw;
+    height: 15vw;
+    object-fit: cover;
+}
+
+.carousel .item {
+    scroll-snap-align: start;
+    
+}
+
+.carousel-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1vh;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    padding: 1vh 2vw; /* Add padding */
+    border-radius: 0.5vw; /* Rounded corners */
+    color: white; /* Text color */
+    font-size: 1.5vw; /* Increase font size */
+}
+
+.carousel-controls button {
+    background-color: #ff5722; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove border */
+    padding: 1vh 2vw; /* Add padding */
+    border-radius: 0.5vw; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.carousel-controls button:hover {
+    background-color: #e64a19; /* Darker background on hover */
 }
