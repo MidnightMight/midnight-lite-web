@@ -65,7 +65,7 @@ body {
     background-image: url('_X100068.webp');
 
     /* Set a specific height */
-    height: 40vh;
+    height: 45vh;
 
     /* Create the parallax scrolling effect */
     background-attachment: fixed;
@@ -81,7 +81,7 @@ body {
     justify-content: space-between;
     background-color: #333;
     color: white;
-    padding: 1vh 3vw;
+    padding: 1vh 2vw;
     position: sticky;
     top: 0;
     width: 100%;
@@ -104,7 +104,7 @@ body {
 .topbar .nav-links li a {
     color: white;
     text-decoration: none;
-    padding: 1vh 1vw;
+    padding: 0.3vh 1vw;
     transition: background 0.3s;
 }
 
@@ -119,8 +119,8 @@ body {
     padding: 3vw;
     border-radius: 1vw;
     box-shadow: 0 0 2vw rgba(0, 0, 0, 0.65);
-    max-width: 65vw;
-    width: auto;
+    max-width: 60vw;
+    width: fit-content;
     min-width: -webkit-fit-content;
     min-width: -moz-fit-content;
     min-width: fit-content;
@@ -134,7 +134,11 @@ body {
 .container h1 {
     font-size: 5vw;
     margin-bottom: 2vh;
+    max-width: 60vw;
+    width: fit-content;
+    text-align: center;
 }
+
 
 /* Button Styling */
 .container button,
@@ -175,6 +179,9 @@ body {
     margin-top: 2vh;
     font-size: 2vw;
     text-align: center;
+    max-width: 60vw;
+    width: fit-content;
+    margin: auto;
 }
 
 .container footer {
@@ -330,6 +337,25 @@ body {
     margin-top: 2vh;
 }
 
+.carousel p{
+    font-size: 1vw;
+    text-align: center;
+    margin-top: 1vh;
+    color: lightslategray;
+}
+
+.carousel h3{
+    font-size: 1.5vw;
+    text-align: center;
+    margin-top: 1vh;
+    color: lightslategray;
+}
+
+.carousel a {
+    text-decoration: none;
+    color: lightslategray;
+    
+}
 .carousel img {
     scroll-snap-align: start;
     border-radius: 1vw;
