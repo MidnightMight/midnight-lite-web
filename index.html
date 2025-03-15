@@ -3,100 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Midnight_Home</title>
+    <title>Midnight_Lite</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="Midnight_lite_logo-_2_.ico" type="image/x-icon"> <!-- Add your favicon path here -->
+    <link rel="icon" href="Midnight_lite_logo.ico" type="image/x-icon">
 </head>
 <body>
-    <!-- Top Bar Menu -->
+
+    <!-- 🟢 Top Bar Menu -->
     <header class="topbar">
         <div class="logo">
-            <a href="#">Midnight_lite</a>
+            <a href="#">Midnight_Lite</a>
         </div>
         <nav>
             <ul class="nav-links">
-                <li><a href="index.html">home</a></li>
+                <li><a href="index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="Services.html">Services</a></li>
+                <li><a href="services.html">Services</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
     </header>
-<!-- Background Animation Overlay -->
-<div class="background-animation">
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-</div>    
-<!-- Main Content -->
- <div class="parallax">
-    <div style="height: 15vh;"></div>
-    <div class="container">
-        <h1>Welcome to 
-            Midnight's </h1> 
-        <h1>Website ! </h1>
-        <p class="description"> A place where there may be fun stuff happening soon. </p>    
+
+    <!-- 🟢 Background Animation -->
+    <div class="background-animation">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+    </div>  
+
+    <!-- 🟢 Hero Section -->
+    <div class="parallax">
+        <div style="height: 50%;"></div>
+        <div class="container">
+            <h1>Welcome to Midnight's Website!</h1>
+            <p class="description">A place where fun stuff may happen soon.</p>
+            <p class="sub-description">Stay tuned for more updates and exciting content!</p>
+        </div>
     </div>
-</div>
-<div style="height: 20vh;"></div>
-<div class="banner">
-    <h1>Current Projects</h1>
-    <p class="description">On Going Project below </p>
-    <div class="carousel-controls">
-        <button class="carousel-control left prev">&#10094;</button>
-        <button class="carousel-control right next">&#10095;</button>
-    </div>
-    <div class="carousel">
-        <div class="carousel-item">
-            <a href="project1.html">
-                <img src="Under Construction.webp" alt="Project Website Building">
-                <h3>Website Building from scratch</h3>
-                <p>A mini side-track project to kick start my Journey to Documenting and making awsome platform to share what I've learnt.</p>
-            </a>
+    <div style="height: 30vh;"></div>
+    <!-- 🟢 Projects Section -->
+    <section class="banner">
+        <div class="container" style="position: relative; z-index: 1; margin-bottom: -50px;"> 
+            <h1>Current Projects</h1>
+            <p class="description">Ongoing projects are listed below:</p>
         </div>
-        <div class="carousel-item">
-            <a href="project2.html">
-                <img src="Under Construction.webp" alt="Project Smart Bin Lid">
-                <h3>Project: Automatic Lid</h3>
-                <p>This involves a way to make a Bin lids open when detecting hand near the lid or approaching it.</p>
-            </a>
+        <div class="carousel-controls">
+            <button class="carousel-control left prev">&#10094;</button>
+            <button class="carousel-control right next">&#10095;</button>
         </div>
-        <div class="carousel-item">
-            <a href="project3.html">
-                <img src="Under Construction.webp" alt="Project 3">
-                <h3>Project 3</h3>
-                <p>Project 3 Description</p>
-            </a>
-        </div>
-        <div class="carousel-item">
-            <a href="project4.html">
-                <img src="Under Construction.webp" alt="Project 4">
-                <h3>Project 4</h3>
-                <p>Project 4 Description</p>
-            </a>
-        </div>
-        <div class="carousel-item">
-            <a href="project5.html">
-                <img src="Under Construction.webp" alt="Project 5">
-                <h3>Project 5</h3>
-                <p>Project 5 Description</p>
-            </a>
-        </div>
-    </div>    
-</div>     
-<script src="carousel.js"></script>
+        
+        <div class="carousel">
+            <div class="carousel-item">
+                <a href="project1.html">
+                    <img src="Under_Construction.webp" alt="Website Building">
+                    <h3>Website Building from Scratch</h3>
+                    <p>In fact it's this website......</p>
+                </a>
+            </div>
+            <div class="carousel-item">
+                <a href="project2.html">
+                    <img src="Under_Construction.webp" alt="ESP32 cam for fun">
+                    <h3>Project: ESP32 cam for fun</h3>
+                    <p>Developing ESP32 survellance camera cause why not.</p>
+                </a>
+            </div>
+            <div class="carousel-item">
+                <a href="project3.html">
+                    <img src="Under_Construction.webp" alt="Project 3 : Mystery">
+                    <h3>Project: Raspberry pi related</h3>
+                    <p>Coming soon...</p>
+                </a>
+            </div>
+        </div>    
+    </section>     
 
-<!--Footer-->
-<div class="footer">
-    <footer>
-        Created By Midnight Lite (from 2025) 
-
-
+    <!-- 🟢 Footer -->
+    <footer class="footer" id="contact">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Contact me</h3>
+                <p>Email: <a href="mailto:enquiry@midnight-lite.com">enquiry@Midnight-Lite.com</a></p>
+                <!-- <p>Phone: +1 (123) 456-7890</p> -->
+                <!-- <p>LinkedIn: <a href="https://linkedin.com/in/yourname" target="_blank">linkedin.com/in/yourname</a></p> -->
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="footer-copyright">© 2025 Midnight Lite. All Rights Reserved.</p>
     </footer>
-</div>
+
+    <script src="carousel.js"></script>
 
 </body>
 </html>
