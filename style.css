@@ -86,12 +86,13 @@ body {
 
 .container h1 {
     font-size: 5vw;
-    margin-bottom: 2vh;
+    margin-bottom: 0.5vh;
     text-align: center;
+    color: #fcdc4f;
 }
 
 .container .description {
-    margin-top: 2vh;
+    margin-top: 0vh;
     font-size: 2vw;
     text-align: center;
     max-width: 60vw;
@@ -137,7 +138,7 @@ button:hover {
 }
 
 .footer-section h3 {
-    color: #f8b400;
+    color: #ffffff;
 }
 
 .footer-section ul {
@@ -150,7 +151,7 @@ button:hover {
 }
 
 .footer-section a {
-    color: #f8b400;
+    color: #a8d7fd;
     text-decoration: none;
 }
 
