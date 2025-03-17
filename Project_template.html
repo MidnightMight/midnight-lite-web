@@ -3,59 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Web!</title>
+    <title>Midnight_Lite Projects</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="Midnight_lite_logo-_2_.ico" type="image/x-icon"> <!-- Add your favicon path here -->
+    <link rel="icon" href="Midnight_lite_logo.ico" type="image/x-icon">
 </head>
 <body>
-    <header class="topbar">    <!-- Top Bar Menu -->
+
+    <!-- 🟢 Top Bar Menu -->
+    <header class="topbar">
         <div class="logo">
-            <a href="#">Midnight_lite</a>
+            <img src="logo.webp" alt="Midnight_Lite Logo" style="width: auto; height: 50px;">
         </div>
         <nav>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="Services.html">Services</a></li>
+                <li><a href="services.html">Services</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
     </header>
-<!-- Background Animation Overlay -->
-<div class="background-animation">
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-</div>    
-<!-- Main Content -->
 
-    <div class="parallax" style="background-image: url(Under\ Construction.webp);"><!-- Add your background image path here -->
-        <div style="height: 10vh;"></div>
+    <!-- 🟢 Main Content -->
+    <main class="main-content">
         <div class="container">
-            <h1>Project 1</h1> 
-            <h1>Template n</h1>
-            <p class="description"> A place where there may be fun stuff happening soon.                                                                                                              --------------------------------------------------------------------------------------------------------------</p>    
+            <h1>Project: Website Building from Scratch</h1>
+            <p class="description">In fact it's this website......</p>
+            
+            <div class="project-details">
+                <div class="project-header">
+                    <img src="Under_Construction.webp" alt="Website Building">
+                </div>
+                <div class="project-description">
+                    <h2>Overview</h2>
+                    <p>This project involves building a website from scratch using HTML, CSS, and JavaScript. The goal is to create a fully functional and responsive website that showcases various projects and services offered by Midnight Lite.</p>
+                    
+                    <h2>Technologies Used</h2>
+                    <ul>
+                        <li>HTML</li>
+                        <li>CSS</li>
+                        <li>JavaScript</li>
+                    </ul>
+                    
+                    <h2>Project Status</h2>
+                    <p>Currently under development. Stay tuned for updates!</p>
+                    <h2>Project Timeline</h2>
+                    <div class="mermaid">
+                        gantt
+                            title Project Development Timeline
+                            dateFormat  YYYY-MM-DD
+                            section Planning
+                            Requirements Gathering :done,    des1, 2023-01-01,2023-01-15
+                            Design :done, des2, 2023-01-16, 2023-01-31
+                            section Development
+                            HTML/CSS Development :active, dev1, 2023-02-01, 2023-02-28
+                            JavaScript Development : dev2, 2023-03-01, 2023-03-31
+                            section Testing
+                            Unit Testing : 2023-04-01, 2023-04-15
+                            Integration Testing : 2023-04-16, 2023-04-30
+                    </div>
+
+                    <script type="module">
+                        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+                        mermaid.initialize({ startOnLoad: true });
+                    </script>
+                </div>
+            </div>
         </div>
-        <div style="height: 15vh;"></div>
-    </div>
-<!-- Project timeline -->
- b
+    </main>
 
-<!-- Project Progress (Loading bar ?) -->
-<p>Progress Bar Coming Soon</p>
-
-
-<!--Footer-->
-<div class="footer">
-    <footer>
-        Created By Midnight Lite (from 2025) 
-        
-
+    <!-- 🟢 Footer -->
+    <footer class="footer" id="contact">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Contact me</h3>
+                <p>Email: <a href="mailto:enquiry@midnight-lite.com">enquiry@Midnight-Lite.com</a></p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="footer-copyright">© 2025 Midnight Lite. All Rights Reserved.</p>
     </footer>
-</div>
+
+    <script src="carousel.js"></script>
 
 </body>
 </html>
