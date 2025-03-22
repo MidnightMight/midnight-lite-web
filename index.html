@@ -3,62 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coming Soon</title>
+    <title>Midnight_Lite</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="Midnight_lite_logo-_2_.ico" type="image/x-icon"> <!-- Add your favicon path here -->
+    <link rel="icon" href="Midnight_lite_logo.ico" type="image/x-icon">
 </head>
 <body>
-    <!-- Top Bar Menu -->
+
+    <!-- 🟢 Top Bar Menu -->
     <header class="topbar">
         <div class="logo">
-            <a href="#">Midnight_lite</a>
+            <img src="logo.webp" alt="Midnight_Lite Logo" style="width: auto; height: 50px;">
         </div>
         <nav>
             <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#services">Services</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Services</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
     </header>
-<!-- Background Animation Overlay -->
-<div class="background-animation">
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-</div>    
-    <!-- Main Coming Soon Content -->
-    <div class="container">
-        <h1>COMING SOON</h1>
-        
-        <!-- Curved Box for Countdown -->
-        <div class="countdown-box">
-            <div class="countdown">
-                <div class="time" id="days">0</div>
-                <div class="label">Days</div>
-                <div class="time" id="hours">0</div>
-                <div class="label">Hrs</div>
-                <div class="time" id="minutes">0</div>
-                <div class="label">Mins</div>
-                <div class="time" id="seconds">0</div>
-                <div class="label">Sec</div>
-            </div>
+
+    <!-- 🟢 Background Animation -->
+    <div class="background-animation">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+    </div>  
+
+    <!-- 🟢 Hero Section -->
+    <div class="parallax" style="margin-bottom: 50px;">
+        <div style="height: 50%;"></div>
+        <div class="container" style="background-color: aliceblue; padding: 20px; text-align: center;">
+            <h1>Welcome to</h1>
+            <img src="logo_2.webp" alt="Midnight_Lite Logo" style="width: 200px; height: auto;">
+            <p class="description">A place where fun stuff happens.</p>
+            <p class="sub-description">Stay tuned for more updates and exciting content :P</p></div>
+        </div>
+    </div>
+    <div style="height: 100px;"></div>
+    <!-- 🟢 Projects Section -->
+    <section class="banner">
+        <div class="container" style="position: relative; z-index: 1; margin-bottom: -50px; text-align: center;"> 
+            <h1>Current Projects</h1>
+            <p class="description">Ongoing projects are listed below:</p>
+        </div>
+        <div class="carousel-controls">
+            <button class="carousel-control left prev">&#10094;</button>
+            <button class="carousel-control right next">&#10095;</button>
         </div>
         
-        <button id="notifyBtn">Notify Me!</button>
-        <form id="subscribeForm">
-            <input type="email" id="email" placeholder="Enter your email address" required>
-            <button type="submit">Do Not Notify</button>
-        </form>
-        <p class="description">Something Exciting is arriving</p>
-        <footer>Created By Midnight Lite</footer>
-    </div>
-    
-    <script src="script.js"></script>
-</div>
+        <div class="carousel">
+            <div class="carousel-item">
+                <a href="project1.html">
+                    <img src="Under_Construction.webp" alt="Website Building">
+                    <h3>Website Building from Scratch</h3>
+                    <p>In fact it's this website......</p>
+                </a> 
+            </div>
+            <div class="carousel-item">
+                <a href="project2.html">
+                    <img src="Under_Construction.webp" alt="ESP32 cam for fun">
+                    <h3>Project: ESP32 cam for fun</h3>
+                    <p>Developing ESP32 survellance camera cause why not.</p>
+                </a>
+            </div>
+            <div class="carousel-item">
+                <a href="project3.html">
+                    <img src="Under_Construction.webp" alt="Project 3 : Mystery">
+                    <h3>Project: Raspberry pi related</h3>
+                    <p>Coming soon...</p>
+                </a>
+            </div>
+        </div>    
+    </section>     
+
+    <!-- 🟢 Footer -->
+    <footer class="footer" id="contact">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Contact me</h3>
+                <p>Email: <a href="mailto:enquiry@midnight-lite.com">enquiry@Midnight-Lite.com</a></p>
+                <!-- <p>Phone: +1 (123) 456-7890</p> -->
+                <!-- <p>LinkedIn: <a href="https://linkedin.com/in/yourname" target="_blank">linkedin.com/in/yourname</a></p> -->
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="footer-copyright">© 2025 Midnight Lite. All Rights Reserved.</p>
+    </footer>
+
+    <script src="carousel.js"></script>
+
 </body>
 </html>
