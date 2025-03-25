@@ -4,6 +4,20 @@ import plugin from '@vitejs/plugin-react';
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [plugin()],
+    
+    build: {
+        rollupOptions: {
+            input: {
+                // Main page compile (not sure why but I'll have to put the whole thing in for now)
+                main: 'index.html',
+                about: 'about.html',
+                services: 'Services.html',
+                // Apps for EUC
+                eucVisualiser: 'euc-visualiser.html'
+            }
+        }
+    },
+    
     server: {
         port: 64853,
     }
