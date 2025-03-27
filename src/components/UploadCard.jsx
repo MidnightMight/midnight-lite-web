@@ -16,7 +16,7 @@ export default function UploadCard({
             <CardContent className="flex flex-col gap-4">
                 <TextField
                     type="file"
-                    inputProps={{ accept: ".csv" }}
+                    inputProps={{ accept: ".csv,text/csv,application/vnd.ms-excel",}}
                     onChange={handleFileUpload}
                     variant="outlined"
                     label="Upload CSV File"
