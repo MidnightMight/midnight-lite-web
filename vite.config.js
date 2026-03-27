@@ -17,6 +17,9 @@ export default defineConfig({
                 project1: 'project1.html',
                 project2: 'project2.html',
                 project3: 'project3.html',
+                // Error / status pages
+                notFound: '404.html',
+                underConstruction: 'under-construction.html',
                 // Apps for EUC
                 eucVisualiser: 'euc-visualiser.html'
             }
