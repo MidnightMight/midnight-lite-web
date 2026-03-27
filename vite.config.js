@@ -12,6 +12,11 @@ export default defineConfig({
                 main: 'index.html',
                 about: 'about.html',
                 services: 'Services.html',
+                projects: 'projects.html',
+                projectTemplate: 'project-template.html',
+                project1: 'project1.html',
+                project2: 'project2.html',
+                project3: 'project3.html',
                 // Apps for EUC
                 eucVisualiser: 'euc-visualiser.html'
             }
