@@ -20,6 +20,8 @@ export default defineConfig({
                 // Error / status pages
                 notFound: '404.html',
                 underConstruction: 'under-construction.html',
+                // Dev Log / documentation
+                progress: 'progress.html',
                 // Apps for EUC
                 eucVisualiser: 'euc-visualiser.html'
             }
