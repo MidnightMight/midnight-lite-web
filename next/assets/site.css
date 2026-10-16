@@ -151,6 +151,10 @@ a.card:hover { text-decoration: none; transform: translateY(-3px); box-shadow: 0
 .prose img, .prose .figure { border-radius: 12px; border: 1px solid var(--line); margin: 10px 0 6px; }
 .prose code { font-family: var(--font-mono); background: var(--amber-soft); padding: 1px 6px; border-radius: 4px; font-size: .9em; }
 .prose blockquote { margin: 1em 0; padding: 12px 18px; border-left: 5px solid var(--amber); background: var(--surface); border-radius: 0 10px 10px 0; }
+.prose table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: .95rem; }
+.prose th { background: var(--blue); color: #fff; text-align: left; padding: 8px 10px; }
+.prose td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.prose tbody tr:nth-child(odd) td { background: var(--surface); }
 .figure { aspect-ratio: 16/8; background: var(--amber-soft) var(--honeycomb); display: grid; place-items: center; color: var(--muted);
   font: 600 .85rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
 .side { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 16px; }
@@ -188,3 +192,4 @@ html.review .rv { display: block; margin: 10px 0; padding: 10px 14px; border-rad
   border: 1px solid #ff4081; font: 500 .9rem/1.45 var(--font-body); }
 html.review .rv b { color: #c2185b; }
 html.review .site-header { position: relative; }
+html.review [data-sec]:not(section):not(header):not(footer):not(.now) { padding-top: 34px; }
