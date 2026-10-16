@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact · Midnight Lite</title>
+<link rel="icon" href="assets/img/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="contact">
+<header data-include></header>
+
+<section class="page-hero" data-sec="C1">
+  <div class="wrap">
+    <p class="eyebrow">Contact</p>
+    <h1>Say hello</h1>
+    <p>Questions about a build, an idea for the next video, or a collaboration. Here's where to find me.</p>
+    <div class="rv"><b>C1 intro.</b> <b>Changed:</b> "Community" became "Contact", because discussion now happens in the YouTube comments (your choice).</div>
+  </div>
+</section>
+
+<section data-sec="C2" style="padding-top:20px">
+  <div class="wrap">
+    <div class="grid c3">
+      <div class="panel" style="border-top:5px solid #e62117"><h3>Ask about a build</h3><p class="muted">Comment under the video. I read and answer them, and other viewers often help too.</p><a class="btn yt small" data-yt href="videos.html">▶ YouTube</a></div>
+      <div class="panel" style="border-top:5px solid var(--amber)"><h3>Suggest a video</h3><p class="muted">What should I build or explain next? Use the form below and pick "Video idea".</p><a class="btn small line" href="#form">Suggest an idea</a></div>
+      <div class="panel" style="border-top:5px solid var(--blue)"><h3>Get new posts</h3><p class="muted">New videos and build logs by email, about twice a month.</p><form class="subscribe" onsubmit="return false"><input type="email" placeholder="you@example.com" aria-label="Email"><button class="btn blue small">Subscribe</button></form></div>
+    </div>
+    <div class="rv"><b>C2 ways to reach you.</b> <b>Changed:</b> Discussions board and Discord chat removed; YouTube, video ideas and the newsletter instead.</div>
+  </div>
+</section>
+
+<section data-sec="C3" style="padding-top:0">
+  <div class="wrap" style="max-width:720px">
+    <div class="panel" id="form">
+      <h3>Send a message</h3>
+      <p class="muted">For collaborations, sponsorships, video ideas or anything private.</p>
+      <form onsubmit="return false" style="display:grid;gap:10px">
+        <input class="search" placeholder="Your name" style="border-radius:8px"><input class="search" type="email" placeholder="Email" style="border-radius:8px">
+        <select class="search" style="border-radius:8px"><option>General</option><option>Video idea</option><option>Collaboration / sponsorship</option></select>
+        <textarea class="search" placeholder="Message" style="border-radius:8px;min-height:110px;font:inherit"></textarea>
+        <button class="btn blue">Send</button>
+      </form>
+      <p class="muted" style="font-size:.9rem;margin-top:10px">Or email <a href="mailto:enquiry@midnight-lite.com">enquiry@midnight-lite.com</a></p>
+    </div>
+    <div class="rv"><b>C3 contact form.</b> Runs as a small Cloudflare Pages Function next to the site (free, no server of yours exposed). Messages arrive by email to enquiry@midnight-lite.com.</div>
+  </div>
+</section>
+
+<footer data-include></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+# Admin editor for midnight-lite.com (Sveltia CMS, Decap-compatible config).
+# Open https://www.midnight-lite.com/admin/ and sign in with a GitHub access token (see README "Editing content").
+# Every save is a commit to `main` on GitHub; Cloudflare rebuilds the site in about a minute.
+backend:
+  name: github
+  repo: MidnightMight/midnight-lite-web
+  branch: main
+  commit_messages:
+    create: "Add {{collection}} “{{slug}}” (admin editor)"
+    update: "Update {{collection}} “{{slug}}” (admin editor)"
+    delete: "Delete {{collection}} “{{slug}}” (admin editor)"
+    uploadMedia: "Upload “{{path}}” (admin editor)"
+    deleteMedia: "Delete “{{path}}” (admin editor)"
+
+site_url: https://www.midnight-lite.com
+display_url: https://www.midnight-lite.com
+logo_url: /logo.svg
+media_folder: public/img/uploads
+public_folder: /img/uploads
+# Uploaded photos are converted to WebP in the browser before they are saved:
+# longest side at most 2000 px, quality 85 (a 15 MB camera JPEG ends up around 300-600 KB). SVG/GIF are left as is.
+media_libraries:
+  default:
+    config:
+      slugify_filename: true
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 2000
+          height: 2000
+
+collections:
+  - name: posts
+    label: Build log posts
+    label_singular: Post
+    folder: src/content/posts
+    create: true
+    slug: "{{slug}}"
+    sortable_fields: [date, title]
+    summary: "{{title}} · {{date}}{{draft | ternary(' · DRAFT', '')}}"
+    preview_path: "blog/{{slug}}/"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Short description, name: description, widget: string, hint: "One line, shown on cards and in search results." }
+      - { label: Date, name: date, widget: datetime, time_format: false, date_format: "YYYY-MM-DD", format: "YYYY-MM-DD" }
+      - label: Topic
+        name: topic
+        widget: select
+        options:
+          - { label: "Electric", value: "electric" }
+          - { label: "Robots", value: "robots" }
+          - { label: "3D printing", value: "3d-printing" }
+          - { label: "Photography", value: "photography" }
+          - { label: "Web & software", value: "web" }
+          - { label: "Site updates", value: "site-updates" }
+      - { label: Project, name: project, widget: relation, collection: projects, value_field: "{{slug}}", search_fields: [title], display_fields: [title], required: false }
+      - { label: Cover image, name: cover, widget: image, required: false }
+      - { label: YouTube video ID, name: video, widget: string, required: false, hint: "The part after watch?v= , e.g. dQw4w9WgXcQ. Shown at the top of the post." }
+      - { label: Draft (hidden from the site), name: draft, widget: boolean, default: false }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: projects
+    label: Projects
+    label_singular: Project
+    folder: src/content/projects
+    create: true
+    slug: "{{slug}}"
+    sortable_fields: [order, title]
+    summary: "{{order}}. {{title}} ({{status}})"
+    preview_path: "projects/{{slug}}/"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: One-line summary, name: summary, widget: string }
+      - label: Status
+        name: status
+        widget: select
+        options:
+          - { label: "In progress", value: "in-progress" }
+          - { label: "Done", value: "done" }
+          - { label: "Live (apps/tools)", value: "live" }
+          - { label: "Coming soon (no page yet)", value: "coming-soon" }
+      - { label: Topics, name: topics, widget: select, multiple: true, options: [ { label: "3D printing", value: "3d-printing" }, { label: "Robots", value: "robots" }, { label: "Photography", value: "photography" }, { label: "Electric", value: "electric" }, { label: "Web & software", value: "web" } ] }
+      - { label: Tags, name: tags, widget: list, required: false, hint: "Small labels like KiCad, ESP32." }
+      - { label: Cover image, name: cover, widget: image, required: false }
+      - { label: Order on the Projects page, name: order, widget: number, value_type: int, default: 100, hint: "Lower comes first." }
+      - { label: Featured on the home page, name: featured, widget: boolean, default: false, hint: "The first 3 featured projects (by order) show on Home." }
+      - { label: Started, name: started, widget: string, required: false, hint: "e.g. Sep 2026" }
+      - { label: Skills, name: skills, widget: string, required: false }
+      - { label: Tools, name: tools, widget: string, required: false }
+      - { label: Cost, name: cost, widget: string, required: false }
+      - { label: YouTube video ID, name: video, widget: string, required: false }
+      - { label: Link (e.g. a live tool), name: link, widget: string, required: false }
+      - label: Files
+        name: files
+        widget: list
+        required: false
+        fields:
+          - { label: Label, name: label, widget: string }
+          - { label: Note, name: note, widget: string, required: false }
+          - { label: URL, name: url, widget: string }
+      - { label: Hidden (draft), name: draft, widget: boolean, default: false }
+      - { label: Story, name: body, widget: markdown, hint: "Suggested sections: Why I built it / How it works / The build / Result." }
+
+  - name: videos
+    label: Videos
+    label_singular: Video
+    folder: src/content/videos
+    create: true
+    slug: "{{slug}}"
+    summary: "{{series}} · {{title}}{{youtube | ternary('', ' (planned)')}}"
+    description: "Uploaded videos appear on the site automatically from the channel. Add an entry here to put a video in a series, link it to a project/post, add chapters, or list a planned one (leave the YouTube ID empty)."
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Series (= playlist), name: series, widget: string, hint: "e.g. Ferrofluid display, Quick tips, Photography walks" }
+      - { label: Episode, name: episode, widget: number, value_type: int, required: false }
+      - { label: YouTube video ID, name: youtube, widget: string, required: false, hint: "Empty = planned video." }
+      - { label: Duration, name: duration, widget: string, required: false, hint: "e.g. 12:04" }
+      - { label: Published, name: date, widget: datetime, time_format: false, date_format: "YYYY-MM-DD", format: "YYYY-MM-DD", required: false }
+      - { label: Project, name: project, widget: relation, collection: projects, value_field: "{{slug}}", search_fields: [title], display_fields: [title], required: false }
+      - { label: Build log post, name: post, widget: relation, collection: posts, value_field: "{{slug}}", search_fields: [title], display_fields: [title], required: false }
+      - { label: Description, name: description, widget: string, required: false }
+      - { label: Chapters, name: chapters, widget: string, required: false, hint: "e.g. 0:00 Intro · 1:20 How ferrofluid moves" }
+      - { label: Thumbnail (only for planned videos), name: thumb, widget: image, required: false }
+
+  - name: settings
+    label: Site settings
+    editor: { preview: false }
+    files:
+      - name: now
+        label: '"Now making" strip'
+        file: src/data/now.json
+        fields:
+          - { label: Project, name: project, widget: string }
+          - { label: Link, name: link, widget: string, hint: "e.g. /projects/ferrofluid-display/" }
+          - { label: Stage, name: stage, widget: string }
+          - { label: Percent done, name: percent, widget: number, value_type: int, min: 0, max: 100 }
+      - name: about
+        label: About page
+        file: src/data/about.json
+        fields:
+          - { label: Intro, name: intro, widget: text }
+          - { label: Skills, name: skills, widget: list, fields: [ { label: Title, name: title, widget: string }, { label: Text, name: text, widget: string } ] }
+          - { label: Timeline, name: timeline, widget: list, fields: [ { label: When, name: when, widget: string }, { label: What, name: what, widget: string } ] }
+          - { label: Gear, name: gear, widget: list, fields: [ { label: Item, name: label, widget: string }, { label: Model, name: value, widget: string } ] }
+      - name: tools
+        label: Tools page
+        file: src/data/tools.json
+        fields:
+          - label: Tools
+            name: tools
+            widget: list
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Status, name: status, widget: select, options: [ { label: Live, value: live }, { label: Idea, value: idea } ] }
+              - { label: Tags, name: tags, widget: list }
+              - { label: Text, name: text, widget: string }
+              - { label: URL, name: url, widget: string }
+              - { label: Image, name: image, widget: image, required: false }
+      - name: site
+        label: Links, socials & newsletter
+        file: src/data/site.json
+        fields:
+          - { label: Name, name: name, widget: string }
+          - { label: Handle, name: handle, widget: string }
+          - { label: Home headline, name: tagline, widget: string }
+          - { label: Search description, name: description, widget: text }
+          - { label: Contact email, name: email, widget: string }
+          - { label: YouTube URL, name: youtube, widget: string }
+          - { label: YouTube channel ID, name: youtubeChannelId, widget: string, hint: "Used to pull your latest videos automatically." }
+          - { label: Instagram URL (leave empty to hide), name: instagram, widget: string, required: false }
+          - { label: GitHub URL, name: github, widget: string }
+          - { label: Buttondown username (newsletter), name: buttondown, widget: string, required: false }

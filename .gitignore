@@ -1,18 +1,26 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+.astro
+
+# Environment / secrets
+.env
+*.local
+
+# Database backups
+backups/
+
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# Editor / OS
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -22,3 +30,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Visual Studio
+.vs/

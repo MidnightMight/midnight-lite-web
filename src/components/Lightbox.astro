@@ -1,0 +1,16 @@
+---
+// Image lightbox modal used by project gallery pages. The behaviour lives in
+// src/scripts/lightbox.js; this just provides the markup it hooks into.
+---
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image lightbox">
+  <button class="lightbox-close" id="lightbox-close" aria-label="Close lightbox">&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Previous image">&#10094;</button>
+  <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+  <p class="lightbox-caption" id="lightbox-caption"></p>
+  <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Next image">&#10095;</button>
+</div>
+
+<script>
+  import '../scripts/lightbox.js';
+</script>

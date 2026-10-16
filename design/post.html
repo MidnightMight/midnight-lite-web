@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rebuilding this website (again) · Midnight Lite</title>
+<link rel="icon" href="assets/img/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="blog">
+<header data-include></header>
+
+<section class="page-hero" data-sec="A1">
+  <div class="wrap prose" style="max-width:860px">
+    <p class="eyebrow"><a href="blog.html">Build log</a> · Site updates · <a href="projects.html">This website</a></p>
+    <h1 style="font-size:clamp(2rem,5vw,3rem)">Rebuilding this website (again)</h1>
+    <p class="muted">16 Oct 2026 · 5 min read · by @midnightlite</p>
+    <div class="rv"><b>A1 post header.</b> This is now your <b>first real post</b>, documenting the redesign (your note on the decisions page). Wording is a draft in your voice; mark up anything that doesn't sound like you.</div>
+  </div>
+</section>
+
+<section style="padding-top:20px">
+  <div class="wrap" style="max-width:860px">
+    <article class="prose" data-sec="A2">
+      <p>The first version of this site was hand-written HTML and CSS: a few coding projects mashed together, a carousel on the home page, and a "Services" page that was really just a launcher for my own web apps. Later a GitHub bot helped me clean it up a lot. It worked, but it was built for showing a CV, not for what I actually want to do now: make videos, write up builds, and share the whole process.</p>
+      <p>So I'm rebuilding it around three things: <b>projects</b>, <b>videos</b> and <b>build logs</b>. Here's what changed and why.</p>
+
+      <h2>What moved where</h2>
+      <table>
+        <thead><tr><th>Old site</th><th>New site</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Home (hero + carousel)</td><td>Home</td><td>One clear pitch, a "now making" strip, the latest video, featured projects and recent posts.</td></tr>
+          <tr><td>Projects + project1–3 pages</td><td>Projects + one case-study layout</td><td>Every project gets the same structure: why, how, the build, what went wrong, result, files.</td></tr>
+          <tr><td>(none)</td><td>Videos</td><td>Hub for the new YouTube channel, grouped by series.</td></tr>
+          <tr><td>Dev Log</td><td>Build log</td><td>A real blog. This post is the first one.</td></tr>
+          <tr><td>Services</td><td>Tools</td><td>"Services" sounded like I was selling something. They're free tools; the EUC World visualiser lives here.</td></tr>
+          <tr><td>Contact (footer only)</td><td>Contact page</td><td>A proper form, plus video suggestions. The placeholder phone number and LinkedIn are gone.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Decisions I made</h2>
+      <ul>
+        <li><b>Built with Astro.</b> Posts and projects are now Markdown files instead of hand-written HTML pages, so writing a new post takes minutes. It still produces plain, fast pages served by Cloudflare, deployed automatically from GitHub.</li>
+        <li><b>Comments live on YouTube.</b> No comment system on the site to moderate or keep running. Ask under the video and I'll answer there.</li>
+        <li><b>A newsletter.</b> New videos and build logs about twice a month, by email. No spam.</li>
+        <li><b>Faceless for now.</b> I'm @midnightlite, and the hexagon logo does the talking.</li>
+        <li><b>Fewer, better projects.</b> I start with three: the ferrofluid display, the EUC visualiser and this website. More get added as they become worth showing.</li>
+      </ul>
+
+      <div class="figure">Before / after screenshot of the home page</div>
+
+      <h2>How I'm building it</h2>
+      <p>The layout started as a clickable prototype that I printed, scribbled on and sent back (the headline you see on the home page came from that round). The source lives on GitHub and is backed up to my own Git server at home, and every change goes to a preview branch before it reaches the live site.</p>
+      <blockquote>Lesson so far: printing a design and attacking it with a pen finds problems much faster than staring at it on a screen.</blockquote>
+
+      <h2>What's next</h2>
+      <p>Moving the real content across, then the first ferrofluid build logs to go with Ep. 1 on <a data-yt href="videos.html">YouTube</a>.</p>
+    </article>
+    <div class="rv"><b>A2 article.</b> Written in Markdown in the Astro version. Drop in a real before/after screenshot. Every claim here matches your markup decisions; change the tone freely.</div>
+
+    <div class="panel" data-sec="A3" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:28px 0">
+      <span class="muted">← First post</span><a href="#">Next: Picking a coil driver [coming soon] →</a>
+    </div>
+    <div class="rv"><b>A3 series navigation.</b> Previous / next post.</div>
+
+    <div class="panel" data-sec="A4" style="border-left:6px solid #e62117">
+      <h2 style="margin-bottom:6px">Questions &amp; comments</h2>
+      <p class="muted" style="margin:0 0 14px">Comments live on YouTube. Ask under the latest video, or email me.</p>
+      <div class="btns"><a class="btn yt" data-yt href="videos.html">▶ Comment on YouTube</a><a class="btn line" href="mailto:enquiry@midnight-lite.com">Email me</a></div>
+    </div>
+    <div class="rv"><b>A4 questions.</b> <b>Changed:</b> on-site discussion replaced by a YouTube link (your choice).</div>
+  </div>
+</section>
+
+<footer data-include></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

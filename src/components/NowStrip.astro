@@ -1,0 +1,8 @@
+---
+import now from "../data/now.json";
+---
+<div class="now"><div class="wrap">
+  <span class="pill">Now making</span>
+  <span><a href={now.link}>{now.project}</a> · {now.stage}</span>
+  <div class="bar" role="progressbar" aria-valuenow={now.percent} aria-valuemin="0" aria-valuemax="100"><span style={`width:${now.percent}%`}></span></div><span>{now.percent}%</span>
+</div></div>

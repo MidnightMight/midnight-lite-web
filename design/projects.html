@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projects · Midnight Lite</title>
+<link rel="icon" href="assets/img/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="projects">
+<header data-include></header>
+
+<section class="page-hero" data-sec="P1">
+  <div class="wrap">
+    <p class="eyebrow">Portfolio</p>
+    <h1>Projects</h1>
+    <p>Everything I've built or am building, with the files, the notes and what went wrong. Pick a topic or just scroll.</p>
+    <div class="rv"><b>P1 intro.</b> Short and personal. This page doubles as your skills portfolio, so each card links to a full case study.</div>
+  </div>
+</section>
+
+<section data-sec="P2" style="padding-top:20px">
+  <div class="wrap">
+    <div class="filters">
+      <button class="chip on" data-filter="all">All</button>
+      <button class="chip" data-filter="3d">3D printing</button>
+      <button class="chip" data-filter="robots">Robots</button>
+      <button class="chip" data-filter="photo">Photography</button>
+      <button class="chip" data-filter="electric">Electric</button>
+      <button class="chip" data-filter="web">Web &amp; software</button>
+      <span style="flex:1"></span>
+      <input class="search" type="search" placeholder="Search projects…" aria-label="Search projects">
+    </div>
+    <div class="rv"><b>P2 filters.</b> Topic chips + search. Statuses: <i>In progress</i> (blue), <i>Done</i> (amber), <i>Coming soon</i> (grey).</div>
+
+    <div class="grid c3" data-sec="P3">
+      <a class="card top-blue" data-cat="electric" href="project.html">
+        <div class="thumb"><span class="ph">Board render</span></div>
+        <div class="body"><div class="meta"><span class="status wip">In progress</span><span class="tag">Electric</span><span class="tag">KiCad</span></div>
+          <h3>Ferrofluid display add-on</h3><p>An electromagnet driver board that makes ferrofluid dance to music.</p>
+          <div class="meta"><span>▶ 1 video</span><span>· 3 build logs</span><span>· updated 4 days ago</span></div></div></a>
+      <a class="card top-blue" data-cat="web" href="post.html">
+        <div class="thumb"><span class="ph">Site screenshot</span></div>
+        <div class="body"><div class="meta"><span class="status wip">In progress</span><span class="tag">Web &amp; software</span></div>
+          <h3>This website</h3><p>Hand-built HTML in 2025, now rebuilt in Astro around videos and build logs.</p>
+          <div class="meta"><span>1 build log</span><span>· updated today</span></div></div></a>
+      <a class="card top-amber" data-cat="web" href="tools.html">
+        <div class="thumb"><span class="ph">App screenshot</span></div>
+        <div class="body"><div class="meta"><span class="status done">Live</span><span class="tag">Web &amp; software</span><span class="tag">React</span></div>
+          <h3>EUC World data visualiser</h3><p>Upload an EUC World ride log and see the map, speed and battery charts.</p>
+          <div class="meta"><span>Try it in Tools →</span></div></div></a>
+      <a class="card top-blue" data-cat="electric robots" href="project.html">
+        <div class="thumb"><span class="ph">Camera photo</span></div>
+        <div class="body"><div class="meta"><span class="status wip">In progress</span><span class="tag">Electric</span><span class="tag">ESP32</span></div>
+          <h3>ESP32 cam for fun</h3><p>A DIY Wi-Fi surveillance camera that streams live video, because why not.</p>
+          <div class="meta"><span>2 build logs</span><span>· updated 3 weeks ago</span></div></div></a>
+      <a class="card top-amber" data-cat="photo" href="project.html">
+        <div class="thumb"><img src="assets/img/photo-card.webp" alt="Misty rainforest seen from a covered deck"></div>
+        <div class="body"><div class="meta"><span class="status done">Done</span><span class="tag">Photography</span></div>
+          <h3>Rainforest mornings</h3><p>A photo set from the hills: fog, green and a lot of waiting.</p>
+          <div class="meta"><span>12 photos</span></div></div></a>
+      <a class="card" data-cat="robots" href="#">
+        <div class="thumb"><span class="ph">Coming soon</span></div>
+        <div class="body"><div class="meta"><span class="status soon">Coming soon</span><span class="tag">Robots</span><span class="tag">Raspberry Pi</span></div>
+          <h3>Raspberry Pi project</h3><p>Details soon. Something fun and probably slightly over-engineered.</p></div></a>
+    </div>
+    <div class="rv"><b>P3 project grid.</b> <b>Changed:</b> USB-C LED board and the 3D-print placeholder removed. Your three ticked projects (Ferrofluid, This website, EUC visualiser) come first.</div>
+  </div>
+</section>
+
+<footer data-include></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

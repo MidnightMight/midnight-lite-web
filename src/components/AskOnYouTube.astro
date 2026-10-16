@@ -1,0 +1,9 @@
+---
+import { site } from "../lib/site";
+const { video, text = "Comments live on YouTube. Ask under the video and I'll answer there, or email me for anything private." } = Astro.props;
+---
+<div id="questions" class="panel ask">
+  <h2 style="margin-bottom:6px">Questions &amp; comments</h2>
+  <p class="muted" style="margin:0 0 14px">{text}</p>
+  <div class="btns"><a class="btn yt" href={video ? `https://www.youtube.com/watch?v=${video}` : site.youtube}>▶ Comment on YouTube</a><a class="btn line" href={`mailto:${site.email}`}>Email me</a></div>
+</div>

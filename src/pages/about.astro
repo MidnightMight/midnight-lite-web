@@ -1,0 +1,33 @@
+---
+import Base from "../layouts/Base.astro";
+import about from "../data/about.json";
+import { site } from "../lib/site";
+---
+<Base title="About" page="about" description="About Midnight Lite (@midnightlite): skills, timeline and the gear behind the videos.">
+  <section class="page-hero">
+    <div class="wrap split" style="grid-template-columns:1.3fr .7fr">
+      <div>
+        <p class="eyebrow">About</p>
+        <h1>Hi, I'm Midnight Lite.</h1>
+        <p>{about.intro}</p>
+        <div class="btns"><a class="btn blue" href="/projects/">See my work</a><a class="btn yt" href={site.youtube}>▶ YouTube</a><a class="btn line" href="/contact/">Get in touch</a></div>
+      </div>
+      <img src="/logo.svg" alt="Midnight Lite logo" width="280" height="280" style="width:min(280px,80%);justify-self:center;filter:drop-shadow(0 10px 22px rgba(0,0,0,.18))">
+    </div>
+  </section>
+  <section style="padding-top:20px">
+    <div class="wrap">
+      <div class="section-head"><h2>Skills</h2></div>
+      <div class="grid c4">{about.skills.map((s) => <div class="topic"><span class="hx"></span><h3>{s.title}</h3><p>{s.text}</p></div>)}</div>
+    </div>
+  </section>
+  <section style="padding-top:0">
+    <div class="wrap split" style="align-items:start">
+      <div>
+        <div class="section-head blue"><h2>Timeline</h2></div>
+        <ul class="timeline">{about.timeline.map((t) => <li><time>{t.when}</time><br>{t.what}</li>)}</ul>
+      </div>
+      <div class="panel"><h3>Gear I use</h3><ul class="facts">{about.gear.map((g) => <li><b>{g.label}</b><span>{g.value}</span></li>)}</ul></div>
+    </div>
+  </section>
+</Base>

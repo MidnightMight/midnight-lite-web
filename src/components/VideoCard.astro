@@ -1,0 +1,10 @@
+---
+const { v } = Astro.props;   // { title, series, episode?, youtube?, duration?, thumb? }
+const href = v.youtube ? `https://www.youtube.com/watch?v=${v.youtube}` : undefined;
+const thumb = v.thumb || (v.youtube ? `https://i.ytimg.com/vi/${v.youtube}/hqdefault.jpg` : undefined);
+const Tag = href ? "a" : "div";
+---
+<Tag class="card" href={href} data-cat={v.series}>
+  <div class="thumb">{thumb && <img src={thumb} alt="" loading="lazy">}<span class="play"></span>{v.duration && <span class="duration">{v.duration}</span>}</div>
+  <div class="body"><span class="eyebrow">{v.series}{v.episode ? ` · Ep. ${v.episode}` : ""}</span><h3>{v.youtube ? "" : "[Planned] "}{v.title}</h3></div>
+</Tag>

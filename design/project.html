@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ferrofluid display add-on · Midnight Lite</title>
+<link rel="icon" href="assets/img/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="projects">
+<header data-include></header>
+
+<section class="page-hero" data-sec="D1">
+  <div class="wrap">
+    <p class="eyebrow"><a href="projects.html">Projects</a> / Electric</p>
+    <h1>Ferrofluid display add-on</h1>
+    <p>An electromagnet driver board that makes ferrofluid dance to music. <i>[placeholder text: your one-paragraph summary]</i></p>
+    <div class="btns"><a class="btn yt" href="videos.html">▶ Watch the video</a><a class="btn line" href="#files">Get the files</a><a class="btn line" href="#discuss">Ask a question</a></div>
+    <div class="rv"><b>D1 project header.</b> The case-study template every project uses. Title, one-paragraph summary, 3 quick actions.</div>
+  </div>
+</section>
+
+<section style="padding-top:24px">
+  <div class="wrap layout-2">
+    <article class="prose">
+      <div class="figure" data-sec="D2" style="aspect-ratio:16/9">Hero photo or 3D board render</div>
+      <div class="rv"><b>D2 hero image.</b> Best photo/render. Click opens a gallery (your old lightbox.js can be reused).</div>
+
+      <div data-sec="D3">
+      <h2 id="why">Why I built it</h2>
+      <p>[Placeholder] The idea, the inspiration, what problem it solves or why it's fun. Two or three short paragraphs in your own words.</p>
+      <h2 id="how">How it works</h2>
+      <p>[Placeholder] A plain-English explanation with one diagram: audio in → analyser → coil driver → electromagnets → ferrofluid.</p>
+      <div class="figure">Block diagram</div>
+      <h2 id="build">The build</h2>
+      <p>[Placeholder] Key decisions and the maths, pulled from the project's <code>DESIGN.md</code>: coil current, MOSFET choice, heat. Link to the full build logs below.</p>
+      <blockquote><b>What went wrong:</b> [placeholder] the honest bit people love: the mistake and how it was fixed.</blockquote>
+      <h2 id="result">Result</h2>
+      <p>[Placeholder] Photos/video of it working, what you'd change next time.</p>
+      </div>
+      <div class="rv"><b>D3 story.</b> Fixed structure (Why / How / Build / What went wrong / Result) makes projects quick to write up and easy to read. Content can be copied from the KiCad <code>DESIGN.md</code> files.</div>
+
+      <div data-sec="D4">
+      <h2 id="logs">Build logs &amp; videos</h2>
+      <ul class="timeline">
+        <li><time>12 Oct 2026</time><br><a href="post.html">Picking a coil driver that won't cook itself</a></li>
+        <li><time>5 Oct 2026</time><br><a href="videos.html">▶ Ep. 1: Why I'm building a ferrofluid display</a></li>
+        <li><time>28 Sep 2026</time><br><a href="post.html">First schematic and the parts list</a></li>
+      </ul>
+      </div>
+      <div class="rv"><b>D4 timeline.</b> Every post/video tagged with this project shows up here automatically, newest first.</div>
+
+      <div id="files" data-sec="D5">
+      <h2>Files</h2>
+      <div class="grid c2" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+        <a class="card" href="#"><div class="body"><h3>Schematic (PDF)</h3><p>Exported from KiCad.</p></div></a>
+        <a class="card" href="#"><div class="body"><h3>BOM (Excel)</h3><p>Parts, suppliers, datasheets.</p></div></a>
+        <a class="card" href="#"><div class="body"><h3>Gerbers</h3><p>Ready for JLCPCB / PCBWay.</p></div></a>
+        <a class="card" href="#"><div class="body"><h3>Source on GitHub</h3><p>Firmware + KiCad project.</p></div></a>
+      </div>
+      </div>
+      <div class="rv"><b>D5 files.</b> Optional per project. KiCad exports (schematic PDF, BOM .xlsx, Gerbers) already come out of the NUC's kicad-docs tool. Public only for projects you choose to open-source.</div>
+
+      <div id="discuss" class="panel" data-sec="D6" style="border-left:6px solid var(--red, #e62117)">
+        <h2 style="margin-bottom:6px">Questions &amp; comments</h2>
+        <p class="muted" style="margin:0 0 14px">Comments live on YouTube, under the video for this project. I read and answer them there.</p>
+        <div class="btns"><a class="btn yt" data-yt href="videos.html">▶ Comment on YouTube</a><a class="btn line" href="mailto:enquiry@midnight-lite.com">Email me</a></div>
+      </div>
+      <div class="rv"><b>D6 questions.</b> <b>Changed:</b> no on-site comments (your choice: YouTube comments only). Links to the project's video; email for anything private.</div>
+    </article>
+
+    <aside class="side" data-sec="D7">
+      <div class="panel">
+        <h3>At a glance</h3>
+        <ul class="facts">
+          <li><b>Status</b><span class="status wip">In progress</span></li>
+          <li><b>Started</b><span>Sep 2026</span></li>
+          <li><b>Topics</b><span>Electric · KiCad</span></li>
+          <li><b>Skills</b><span>PCB design, power electronics</span></li>
+          <li><b>Tools</b><span>KiCad 10, ESP32</span></li>
+          <li><b>Cost</b><span>~$[placeholder]</span></li>
+        </ul>
+      </div>
+      <div class="panel toc"><h3>On this page</h3><a href="#why">Why I built it</a><a href="#how">How it works</a><a href="#build">The build</a><a href="#result">Result</a><a href="#logs">Build logs &amp; videos</a><a href="#files">Files</a><a href="#discuss">Questions</a></div>
+      <div class="rv"><b>D7 sidebar.</b> "At a glance" facts make it work as a portfolio piece (skills, tools). Sticks while scrolling on desktop; moves to the top on phones.</div>
+    </aside>
+  </div>
+</section>
+
+<footer data-include></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>
