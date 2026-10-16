@@ -53,7 +53,8 @@ section { padding: 56px 0; }
   .nav { display: none; position: absolute; top: 67px; left: 0; right: 0; flex-direction: column; padding: 10px 20px 16px;
     background: var(--bg); border-bottom: 3px solid var(--amber); }
   .nav.open { display: flex; }
-  .nav-cta { display: none; }
+  .site-header .nav-cta { margin-left: 8px; padding: 6px 10px; white-space: nowrap; }
+  .brand { white-space: nowrap; font-size: 1.15rem; } .brand img { width: 32px; height: 32px; }
 }
 
 /* buttons */
