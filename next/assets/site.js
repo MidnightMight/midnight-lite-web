@@ -27,7 +27,7 @@
       <div><a class="brand" href="${keep("index.html")}"><img src="assets/img/logo.svg" alt="">Midnight Lite</a>
         <p>3D printing, robots, photography and electric stuff. Built in the open, documented as I go.</p></div>
       <div><h4>Explore</h4><a href="${keep("projects.html")}">Projects</a><a href="${keep("videos.html")}">Videos</a><a href="${keep("blog.html")}">Build log</a><a href="${keep("tools.html")}">Tools</a></div>
-      <div><h4>Follow</h4><a href="${YT}">YouTube</a><a href="#">Instagram</a><a href="https://github.com/MidnightMight">GitHub</a></div>
+      <div><h4>Follow</h4><a href="${YT}">YouTube</a><a href="https://www.instagram.com/midnightlite/">Instagram</a><a href="https://github.com/MidnightMight">GitHub</a></div>
       <div><h4>Contact</h4><a href="mailto:enquiry@midnight-lite.com">enquiry@midnight-lite.com</a><a href="${keep("contact.html")}">Contact form</a><a href="${keep("about.html")}">About</a></div>
       <div class="legal">© ${new Date().getFullYear()} Midnight Lite. Made by hand, mostly after midnight.</div>
     </div>`;
