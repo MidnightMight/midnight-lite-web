@@ -5,7 +5,8 @@ import Footer from "../components/Footer.astro";
 import { site } from "../lib/site";
 
 interface Props { title?: string; description?: string; image?: string; page?: string }
-const { title, description = site.description, image = "/logo.png", page = "" } = Astro.props;
+const { title, description = site.description, page = "" } = Astro.props;
+const image = Astro.props.image || "/logo.png"; // the editor saves empty fields as ""
 const fullTitle = title ? `${title} · Midnight Lite` : "Midnight Lite (@midnightlite) · Maker channel: 3D printing, robots, electronics, photography";
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const org = {

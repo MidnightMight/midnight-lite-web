@@ -13,7 +13,8 @@ Open **https://www.midnight-lite.com/admin/** and sign in. The editor ([Sveltia 
 - add **videos** to a series, or list planned ones,
 - change the **"Now making" strip**, the **About page**, the **Tools page**, and the site's links, socials and newsletter.
 
-Every save is a commit to `main`; Cloudflare rebuilds the site in about a minute.
+Every save is a commit; Cloudflare rebuilds the site in about a minute.
+The editor saves to the branch it's opened from: `www.midnight-lite.com/admin/` edits `main` (the live site), `<branch>.midnight-lite-web.pages.dev/admin/` edits that branch (its preview only).
 
 **Signing in:** choose **Sign In Using Access Token** and paste a GitHub fine-grained personal access token:
 GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → *Generate new token*,
