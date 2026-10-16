@@ -23,7 +23,7 @@ The editor keeps the token in that browser, so only sign in on your own devices.
 
 ("Sign In with GitHub" would need an OAuth helper such as [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth) and `base_url` in `public/admin/config.yml`; not needed for a single editor.)
 
-Uploaded images go to `public/img/uploads/`.
+Uploaded images go to `public/img/uploads/`. The editor converts photos to WebP (max 2000 px, quality 85) before saving; files over 25 MB can't be deployed by Cloudflare Pages.
 
 ## Where things live
 

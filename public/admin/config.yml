@@ -17,6 +17,18 @@ display_url: https://www.midnight-lite.com
 logo_url: /logo.svg
 media_folder: public/img/uploads
 public_folder: /img/uploads
+# Uploaded photos are converted to WebP in the browser before they are saved:
+# longest side at most 2000 px, quality 85 (a 15 MB camera JPEG ends up around 300-600 KB). SVG/GIF are left as is.
+media_libraries:
+  default:
+    config:
+      slugify_filename: true
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 2000
+          height: 2000
 
 collections:
   - name: posts
