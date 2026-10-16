@@ -1,0 +1,94 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import NowStrip from "../components/NowStrip.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import PostCard from "../components/PostCard.astro";
+import Subscribe from "../components/Subscribe.astro";
+import YouTube from "../components/YouTube.astro";
+import { site } from "../lib/site";
+import { channelVideos } from "../lib/youtube";
+
+const featured = (await getCollection("projects", (p) => !p.data.draft && p.data.featured)).sort((a, b) => a.data.order - b.data.order).slice(0, 3);
+const posts = (await getCollection("posts", (p) => !p.data.draft)).sort((a, b) => +b.data.date - +a.data.date).slice(0, 3);
+const feed = await channelVideos();
+const planned = (await getCollection("videos")).sort((a, b) => (a.data.episode ?? 99) - (b.data.episode ?? 99));
+const latest = feed[0]
+  ? { id: feed[0].id, title: feed[0].title, text: feed[0].description.split("\n")[0], post: undefined }
+  : planned[0] && { id: planned[0].data.youtube, title: planned[0].data.title, text: planned[0].data.description, post: planned[0].data.post };
+const topics = [
+  ["3d-printing", "3D printing", "Functional prints, print profiles and the failures that taught me something."],
+  ["robots", "Robots", "Motors, sensors and firmware, built up one revision at a time."],
+  ["photography", "Photography", "Shots, gear notes and DIY rigs for getting the picture."],
+  ["electric", "Electric stuff", "KiCad boards with schematics, datasheets, BOMs and the maths behind them."],
+];
+---
+<Base page="home">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">3D printing · Robots · Photography · Electric stuff</p>
+        <h1>{site.tagline}</h1>
+        <p class="lead">Circuits, robots, prints and photos: the whole messy process, from the first sketch to the thing that finally works. Watch the videos and read the build logs.</p>
+        <div class="btns">
+          <a class="btn yt" href={site.youtube}>▶ Watch on YouTube</a>
+          <a class="btn blue" href="/projects/">See the projects</a>
+          <a class="btn line" href="/blog/">Read the build log</a>
+        </div>
+      </div>
+      <img class="logo-big" src="/logo.svg" alt="Midnight Lite logo" width="340" height="340">
+    </div>
+  </section>
+
+  <NowStrip />
+
+  <section>
+    <div class="wrap">
+      <div class="section-head"><h2>What you'll find here</h2></div>
+      <div class="grid c4">
+        {topics.map(([k, t, p]) => <a class="topic" href={`/projects/?topic=${k}`}><span class="hx"></span><h3>{t}</h3><p>{p}</p></a>)}
+      </div>
+    </div>
+  </section>
+
+  <section style="background:var(--surface);border-block:1px solid var(--line)">
+    <div class="wrap split">
+      <YouTube id={latest?.id} title={latest?.title} caption="First video coming soon" />
+      <div>
+        <p class="eyebrow">{feed[0] ? "Latest video" : "Coming up"}</p>
+        <h2>{latest?.title ?? "The first video is on its way"}</h2>
+        {latest?.text && <p class="muted">{latest.text}</p>}
+        <div class="btns"><a class="btn yt" href={latest?.id && feed[0] ? `https://www.youtube.com/watch?v=${latest.id}` : site.youtube}>▶ {feed[0] ? "Watch" : "Subscribe"}</a>{latest?.post && <a class="btn line" href={`/blog/${latest.post}/`}>Read the build log</a>}</div>
+        <div class="panel amber" style="margin-top:22px">
+          <h3>Don't miss the next one</h3>
+          <p style="margin:0">New videos and build logs, about twice a month. No spam.</p>
+          <Subscribe />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head"><h2>Featured projects</h2><a href="/projects/">All projects →</a></div>
+      <div class="grid c3">{featured.map((p) => <ProjectCard p={p} />)}</div>
+    </div>
+  </section>
+
+  <section style="padding-top:8px">
+    <div class="wrap">
+      <div class="section-head blue"><h2>From the build log</h2><a href="/blog/">All posts →</a></div>
+      <div class="grid c3">{posts.map((p) => <PostCard post={p} />)}</div>
+    </div>
+  </section>
+
+  <section style="padding-top:8px">
+    <div class="wrap">
+      <div class="panel" style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;border-left:6px solid var(--blue)">
+        <div style="flex:1;min-width:260px"><h2 style="margin-bottom:6px">Building something similar?</h2>
+          <p class="muted" style="margin:0">Ask in the YouTube comments, suggest the next video, or email me about collaborations.</p></div>
+        <div class="btns"><a class="btn blue" href={`mailto:${site.email}`}>Email me</a></div>
+      </div>
+    </div>
+  </section>
+</Base>

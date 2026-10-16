@@ -1,0 +1,5 @@
+{
+  "tools": [
+    { "title": "EUC World data visualiser", "status": "live", "tags": ["EUC", "Maps & charts"], "text": "Upload an EUC World ride log (CSV) to see your route on a map plus speed, battery and temperature charts.", "url": "/tools/euc-visualiser/", "image": "" }
+  ]
+}

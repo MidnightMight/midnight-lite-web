@@ -1,0 +1,70 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import YouTube from "../../components/YouTube.astro";
+import AskOnYouTube from "../../components/AskOnYouTube.astro";
+import Lightbox from "../../components/Lightbox.astro";
+import { TOPICS, STATUS, fmtDate } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects", (p) => !p.data.draft && p.data.status !== "coming-soon");
+  return projects.map((p) => ({ params: { slug: p.id }, props: { p } }));
+}
+const { p } = Astro.props; const d = p.data;
+const { Content, headings } = await render(p);
+const posts = (await getCollection("posts", (x) => !x.data.draft && x.data.project === p.id)).map((x) => ({ date: x.data.date, title: x.data.title, href: `/blog/${x.id}/`, video: false }));
+const vids = (await getCollection("videos", (v) => v.data.project === p.id && !!v.data.youtube)).map((v) => ({ date: v.data.date ?? new Date(0), title: v.data.title, href: `https://www.youtube.com/watch?v=${v.data.youtube}`, video: true }));
+const timeline = [...posts, ...vids].sort((a, b) => +b.date - +a.date);
+const [label, cls] = STATUS[d.status];
+const firstTopic = d.topics[0];
+---
+<Base title={d.title} description={d.summary} image={d.cover} page="projects">
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="eyebrow"><a href="/projects/">Projects</a>{firstTopic && ` / ${TOPICS[firstTopic]}`}</p>
+      <h1>{d.title}</h1>
+      <p>{d.summary}</p>
+      <div class="btns">
+        {d.video && <a class="btn yt" href={`https://www.youtube.com/watch?v=${d.video}`}>▶ Watch the video</a>}
+        {d.link && <a class="btn blue" href={d.link}>Try it</a>}
+        {d.files.length > 0 && <a class="btn line" href="#files">Get the files</a>}
+        <a class="btn line" href="#questions">Ask a question</a>
+      </div>
+    </div>
+  </section>
+  <section style="padding-top:28px">
+    <div class="wrap layout-2">
+      <article>
+        {d.cover ? <p class="prose" style="max-width:none"><img src={d.cover} alt={d.title}></p> : d.video && <YouTube id={d.video} title={d.title} />}
+        <div class="prose"><Content /></div>
+
+        {timeline.length > 0 && <div id="logs" style="margin-top:36px">
+          <h2>Build logs &amp; videos</h2>
+          <ul class="timeline">{timeline.map((t) => <li><time>{fmtDate(t.date)}</time><br><a href={t.href}>{t.video ? "▶ " : ""}{t.title}</a></li>)}</ul>
+        </div>}
+
+        {d.files.length > 0 && <div id="files" style="margin-top:36px">
+          <h2>Files</h2>
+          <div class="grid c3">{d.files.map((f) => <a class="panel" href={f.url}><h3>{f.label}</h3>{f.note && <p class="muted" style="margin:0">{f.note}</p>}</a>)}</div>
+        </div>}
+
+        <div style="margin-top:36px"><AskOnYouTube video={d.video} /></div>
+      </article>
+      <aside class="side">
+        <div class="panel">
+          <h3>At a glance</h3>
+          <ul class="facts">
+            <li><b>Status</b><span class={`status ${cls}`}>{label}</span></li>
+            {d.started && <li><b>Started</b><span>{d.started}</span></li>}
+            {d.topics.length > 0 && <li><b>Topics</b><span>{d.topics.map((t) => TOPICS[t]).join(" · ")}</span></li>}
+            {d.skills && <li><b>Skills</b><span>{d.skills}</span></li>}
+            {d.tools && <li><b>Tools</b><span>{d.tools}</span></li>}
+            {d.cost && <li><b>Cost</b><span>{d.cost}</span></li>}
+          </ul>
+        </div>
+        {headings.filter((h) => h.depth === 2).length > 1 && <div class="panel toc"><h3>On this page</h3>{headings.filter((h) => h.depth === 2).map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}{timeline.length > 0 && <a href="#logs">Build logs &amp; videos</a>}{d.files.length > 0 && <a href="#files">Files</a>}<a href="#questions">Questions</a></div>}
+      </aside>
+    </div>
+  </section>
+  <Lightbox />
+</Base>

@@ -1,0 +1,50 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import { TOPICS } from "../../lib/site";
+
+const projects = (await getCollection("projects", (p) => !p.data.draft)).sort((a, b) => a.data.order - b.data.order);
+const posts = await getCollection("posts", (p) => !p.data.draft);
+const videos = await getCollection("videos", (v) => !!v.data.youtube);
+const meta = (id: string) => {
+  const n = posts.filter((p) => p.data.project === id).length, v = videos.filter((x) => x.data.project === id).length;
+  return [v && `▶ ${v} video${v > 1 ? "s" : ""}`, n && `${n} build log${n > 1 ? "s" : ""}`].filter(Boolean).join(" · ") || undefined;
+};
+const chips = ["3d-printing", "robots", "photography", "electric", "web"];
+---
+<Base title="Projects" page="projects" description="Everything Midnight Lite has built or is building: electronics, robots, 3D prints, photography and web tools.">
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="eyebrow">Portfolio</p>
+      <h1>Projects</h1>
+      <p>Everything I've built or am building, with the files, the notes and what went wrong. Pick a topic or just scroll.</p>
+    </div>
+  </section>
+  <section style="padding-top:20px">
+    <div class="wrap">
+      <div class="filters">
+        <button class="chip on" data-filter="all">All</button>
+        {chips.map((c) => <button class="chip" data-filter={c}>{TOPICS[c]}</button>)}
+        <span style="flex:1"></span>
+        <input class="search" type="search" placeholder="Search projects…" aria-label="Search projects">
+      </div>
+      <div class="grid c3" id="grid">{projects.map((p) => <ProjectCard p={p} meta={meta(p.id)} />)}</div>
+      <p class="empty" id="none" hidden>Nothing matches that yet.</p>
+    </div>
+  </section>
+</Base>
+<script>
+  const chips = [...document.querySelectorAll<HTMLButtonElement>("[data-filter]")];
+  const search = document.querySelector<HTMLInputElement>(".search")!;
+  const cards = [...document.querySelectorAll<HTMLElement>("#grid [data-cat]")];
+  let topic = new URLSearchParams(location.search).get("topic") || "all";
+  function apply() {
+    const q = search.value.trim().toLowerCase(); let shown = 0;
+    chips.forEach((c) => c.classList.toggle("on", c.dataset.filter === topic));
+    cards.forEach((c) => { const ok = (topic === "all" || c.dataset.cat!.split(" ").includes(topic)) && (!q || c.dataset.search!.includes(q)); c.hidden = !ok; shown += +ok; });
+    document.getElementById("none")!.hidden = shown > 0;
+  }
+  chips.forEach((c) => c.addEventListener("click", () => { topic = c.dataset.filter!; history.replaceState(null, "", topic === "all" ? location.pathname : `?topic=${topic}`); apply(); }));
+  search.addEventListener("input", apply); apply();
+</script>

@@ -1,0 +1,15 @@
+---
+import Base from "../../layouts/Base.astro";
+import EucDashboard from "../../euc/EUC_App.jsx";
+---
+<Base title="EUC World data visualiser" page="tools" description="Upload an EUC World CSV export and see your route on a map plus speed, power, battery and temperature charts. Runs entirely in your browser.">
+  <section class="page-hero" style="padding-bottom:16px">
+    <div class="wrap">
+      <p class="eyebrow"><a href="/tools/">Tools</a></p>
+      <h1>EUC World data visualiser</h1>
+      <p>Upload an EUC World ride log (CSV). Everything runs in your browser; the file never leaves your computer.</p>
+    </div>
+  </section>
+  <!-- React app; client:only keeps MUI, Recharts and Leaflet off every other page. -->
+  <section style="padding-top:0"><div class="wrap euc"><EucDashboard client:only="react" /></div></section>
+</Base>

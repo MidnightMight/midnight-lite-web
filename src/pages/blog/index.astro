@@ -1,0 +1,46 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import PostCard from "../../components/PostCard.astro";
+import Subscribe from "../../components/Subscribe.astro";
+import { TOPICS } from "../../lib/site";
+
+const posts = (await getCollection("posts", (p) => !p.data.draft)).sort((a, b) => +b.data.date - +a.data.date);
+const projects = await getCollection("projects");
+const series = projects.map((p) => [p.id, p.data.title, posts.filter((x) => x.data.project === p.id).length] as const).filter(([, , n]) => n > 0);
+const used = [...new Set(posts.map((p) => p.data.topic))];
+---
+<Base title="Build log" page="blog" description="Written notes from the bench: progress, the maths and the mistakes behind each Midnight Lite project.">
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="eyebrow">Blog</p>
+      <h1>Build log</h1>
+      <p>Written notes from the bench: progress, the maths, the mistakes. Shorter than a video, more detail than a caption.</p>
+    </div>
+  </section>
+  <section style="padding-top:20px">
+    <div class="wrap layout-2">
+      <div>
+        <div class="filters"><button class="chip on" data-filter="all">All</button>{used.map((t) => <button class="chip" data-filter={t}>{TOPICS[t]}</button>)}</div>
+        <div class="grid" id="posts">{posts.map((p, i) => <div data-cat={p.data.topic} data-search={`${p.data.title} ${p.data.description}`.toLowerCase()}><PostCard post={p} big={i === 0} /></div>)}</div>
+        {posts.length === 0 && <p class="empty">The first post is on its way.</p>}
+      </div>
+      <aside class="side">
+        <div class="panel"><h3>Search</h3><input class="search" type="search" placeholder="Search posts…" style="width:100%;min-width:0" aria-label="Search posts"></div>
+        {series.length > 0 && <div class="panel"><h3>Series</h3>{series.map(([id, t, n]) => <a href={`/projects/${id}/`} style="display:block">{t} ({n})</a>)}</div>}
+        <div class="panel amber"><h3>Get new posts</h3><p style="margin:0">New posts and videos by email, about twice a month.</p><Subscribe small /></div>
+      </aside>
+    </div>
+  </section>
+</Base>
+<script>
+  const chips = [...document.querySelectorAll<HTMLButtonElement>("[data-filter]")];
+  const search = document.querySelector<HTMLInputElement>(".search")!;
+  const items = [...document.querySelectorAll<HTMLElement>("#posts > [data-cat]")];
+  let topic = "all";
+  const apply = () => { const q = search.value.trim().toLowerCase();
+    chips.forEach((c) => c.classList.toggle("on", c.dataset.filter === topic));
+    items.forEach((i) => i.hidden = !((topic === "all" || i.dataset.cat === topic) && (!q || i.dataset.search!.includes(q)))); };
+  chips.forEach((c) => c.addEventListener("click", () => { topic = c.dataset.filter!; apply(); }));
+  search.addEventListener("input", apply);
+</script>

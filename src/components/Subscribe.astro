@@ -1,0 +1,10 @@
+---
+// Newsletter box. Set "buttondown" (your Buttondown username) in src/data/site.json (or in /admin > Settings).
+import { site } from "../lib/site";
+const { small = false } = Astro.props;
+const action = site.buttondown ? `https://buttondown.com/api/emails/embed-subscribe/${site.buttondown}` : undefined;
+---
+<form class="subscribe" method="post" action={action} target="_blank" onsubmit={action ? undefined : "alert('Newsletter coming soon!'); return false"}>
+  <input type="email" name="email" placeholder="you@example.com" aria-label="Email" required>
+  <button class={`btn blue${small ? " small" : ""}`}>Subscribe</button>
+</form>

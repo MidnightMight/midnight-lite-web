@@ -1,0 +1,13 @@
+---
+import { TOPICS, fmtDate, readMins } from "../lib/site";
+const { post, big = false } = Astro.props;
+const d = post.data;
+---
+<a class={`card ${big ? "top-amber" : ""}`} href={`/blog/${post.id}/`} style={big ? "flex-direction:row;flex-wrap:wrap" : undefined}>
+  {big && <div class="thumb" style="flex:0 0 280px;aspect-ratio:auto;min-height:170px">{d.cover ? <img src={d.cover} alt=""> : <span class="ph">Build log</span>}</div>}
+  <div class="body" style={big ? "min-width:260px" : undefined}>
+    <span class="eyebrow">{fmtDate(d.date)} · {TOPICS[d.topic]}</span>
+    <h3>{d.title}</h3><p>{d.description}</p>
+    <div class="meta"><span>{readMins(post.body)} min read</span>{d.video && <span>· ▶ has video</span>}</div>
+  </div>
+</a>

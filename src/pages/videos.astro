@@ -1,0 +1,54 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import VideoCard from "../components/VideoCard.astro";
+import YouTube from "../components/YouTube.astro";
+import { site } from "../lib/site";
+import { channelVideos } from "../lib/youtube";
+
+// Videos = what's on the channel (RSS feed) merged with src/content/videos (series, chapters, links, and planned ones).
+const feed = await channelVideos();
+const entries = await getCollection("videos");
+const byId = new Map(entries.filter((e) => e.data.youtube).map((e) => [e.data.youtube, e.data]));
+const list = [
+  ...feed.map((f) => ({ ...(byId.get(f.id) ?? { series: "Latest" }), title: byId.get(f.id)?.title ?? f.title, youtube: f.id, date: f.published, description: byId.get(f.id)?.description ?? f.description.split("\n")[0] })),
+  ...entries.filter((e) => !e.data.youtube || !feed.some((f) => f.id === e.data.youtube)).map((e) => e.data),
+];
+const featured = list.find((v) => v.youtube) ?? list[0];
+const series = [...new Set(list.map((v) => v.series))];
+---
+<Base title="Videos" page="videos" description="Midnight Lite on YouTube: build videos, quick tips and the occasional disaster.">
+  <section class="page-hero">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap">
+      <div><p class="eyebrow">YouTube channel</p><h1>Videos</h1>
+        <p>Build videos, quick tips and the occasional disaster. New episodes about twice a month.</p></div>
+      <a class="btn yt" href={`${site.youtube}?sub_confirmation=1`}>▶ Subscribe on YouTube</a>
+    </div>
+  </section>
+  {featured && <section style="padding-top:20px">
+    <div class="wrap split">
+      <YouTube id={featured.youtube} title={featured.title} caption="First video coming soon" />
+      <div>
+        {featured.youtube ? <span class="status wip">New</span> : <span class="status soon">Coming soon</span>}
+        <h2 style="margin-top:10px">{featured.title}</h2>
+        {featured.description && <p class="muted">{featured.description}</p>}
+        {featured.chapters && <p class="muted">Chapters: {featured.chapters}</p>}
+        <div class="btns">{featured.project && <a class="btn line" href={`/projects/${featured.project}/`}>Project page</a>}{featured.post && <a class="btn line" href={`/blog/${featured.post}/`}>Build log</a>}</div>
+      </div>
+    </div>
+  </section>}
+  <section>
+    <div class="wrap">
+      <div class="section-head"><h2>Series</h2></div>
+      <div class="filters"><button class="chip on" data-filter="all">All</button>{series.map((s) => <button class="chip" data-filter={s}>{s}</button>)}</div>
+      <div class="grid c3" id="vids">{list.map((v) => <VideoCard v={v} />)}</div>
+    </div>
+  </section>
+</Base>
+<script>
+  const chips = [...document.querySelectorAll<HTMLButtonElement>("[data-filter]")];
+  chips.forEach((c) => c.addEventListener("click", () => {
+    chips.forEach((x) => x.classList.toggle("on", x === c));
+    document.querySelectorAll<HTMLElement>("#vids [data-cat]").forEach((v) => v.hidden = c.dataset.filter !== "all" && v.dataset.cat !== c.dataset.filter);
+  }));
+</script>

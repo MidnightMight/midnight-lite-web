@@ -1,0 +1,6 @@
+---
+// Privacy-friendly embed (youtube-nocookie). Without an ID it shows the honeycomb placeholder.
+const { id, title = "YouTube video", caption = "Video coming soon" } = Astro.props;
+---
+{id ? <iframe class="yt-embed" src={`https://www.youtube-nocookie.com/embed/${id}`} title={title} loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+    : <div class="video-frame"><span class="play"></span><span class="cap">{caption}</span></div>}

@@ -1,0 +1,52 @@
+---
+import Base from "../layouts/Base.astro";
+import Subscribe from "../components/Subscribe.astro";
+import { site } from "../lib/site";
+---
+<Base title="Contact" page="contact" description="Get in touch with Midnight Lite: questions about a build, video ideas, collaborations and sponsorships.">
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="eyebrow">Contact</p>
+      <h1>Say hello</h1>
+      <p>Questions about a build, an idea for the next video, or a collaboration. Here's where to find me.</p>
+    </div>
+  </section>
+  <section style="padding-top:20px">
+    <div class="wrap">
+      <div class="grid c3">
+        <div class="panel" style="border-top:5px solid #e62117"><h3>Ask about a build</h3><p class="muted">Comment under the video. I read and answer them, and other viewers often help too.</p><a class="btn yt small" href={site.youtube}>▶ YouTube</a></div>
+        <div class="panel" style="border-top:5px solid var(--amber)"><h3>Suggest a video</h3><p class="muted">What should I build or explain next? Use the form below and pick "Video idea".</p><a class="btn small line" href="#form">Suggest an idea</a></div>
+        <div class="panel" style="border-top:5px solid var(--blue)"><h3>Get new posts</h3><p class="muted">New videos and build logs by email, about twice a month.</p><Subscribe small /></div>
+      </div>
+    </div>
+  </section>
+  <section style="padding-top:0">
+    <div class="wrap" style="max-width:720px">
+      <div class="panel" id="form">
+        <h3>Send a message</h3>
+        <p class="muted">For collaborations, sponsorships, video ideas or anything private.</p>
+        <form id="contact" method="post" action="/api/contact" style="display:grid;gap:10px">
+          <input class="search" name="name" placeholder="Your name" required style="border-radius:8px">
+          <input class="search" name="email" type="email" placeholder="Email" required style="border-radius:8px">
+          <select class="search" name="topic" style="border-radius:8px"><option>General</option><option>Video idea</option><option>Collaboration / sponsorship</option></select>
+          <textarea class="search" name="message" placeholder="Message" required style="border-radius:8px;min-height:110px;font:inherit"></textarea>
+          <input class="honeypot" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn blue">Send</button>
+        </form>
+        <p class="form-msg" id="msg" role="status"></p>
+        <p class="muted" style="font-size:.9rem;margin-top:10px">Or email <a href={`mailto:${site.email}`}>{site.email}</a></p>
+      </div>
+    </div>
+  </section>
+</Base>
+<script>
+  const form = document.getElementById("contact") as HTMLFormElement, msg = document.getElementById("msg")!;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault(); msg.textContent = "Sending…";
+    try {
+      const r = await fetch(form.action, { method: "POST", body: new FormData(form) });
+      if (!r.ok) throw new Error();
+      form.reset(); msg.textContent = "Thanks! Your message is on its way.";
+    } catch { msg.textContent = "Sorry, that didn't send. Please email enquiry@midnight-lite.com instead."; }
+  });
+</script>

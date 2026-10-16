@@ -1,0 +1,23 @@
+---
+import Base from "../../layouts/Base.astro";
+import data from "../../data/tools.json";
+---
+<Base title="Tools" page="tools" description="Free browser tools from Midnight Lite, like the EUC World ride-log visualiser. Nothing you upload leaves your computer.">
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="eyebrow">Free web tools</p>
+      <h1>Tools</h1>
+      <p>Small apps I built for my own projects, free to use in your browser. Nothing you upload leaves your computer.</p>
+    </div>
+  </section>
+  <section style="padding-top:20px">
+    <div class="wrap">
+      <div class="grid c3">{data.tools.map((t) =>
+        <a class="card top-amber" href={t.url}>
+          <div class="thumb">{t.image ? <img src={t.image} alt=""> : <span class="ph">{t.title}</span>}</div>
+          <div class="body"><div class="meta"><span class={`status ${t.status === "live" ? "done" : "soon"}`}>{t.status === "live" ? "Live" : "Idea"}</span>{t.tags.map((g) => <span class="tag">{g}</span>)}</div>
+            <h3>{t.title}</h3><p>{t.text}</p></div>
+        </a>)}</div>
+    </div>
+  </section>
+</Base>

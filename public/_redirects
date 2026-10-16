@@ -1,0 +1,14 @@
+# Old (2024-2025) URLs -> new pages. Cloudflare reads this file from the build output.
+/index.html                /                             301
+/projects.html             /projects/                    301
+/project1.html             /projects/this-website/       301
+/project2.html             /projects/esp32-cam/          301
+/project3.html             /projects/                    301
+/project-template.html     /projects/                    301
+/Project_template.html     /projects/                    301
+/progress.html             /blog/                        301
+/about.html                /about/                       301
+/Services.html             /tools/                       301
+/services.html             /tools/                       301
+/euc-visualiser.html       /tools/euc-visualiser/        301
+/under-construction.html   /                             301

@@ -1,0 +1,15 @@
+---
+import { TOPICS, STATUS } from "../lib/site";
+const { p, meta } = Astro.props;   // p = project entry; meta = optional extra line
+const d = p.data; const [label, cls] = STATUS[d.status];
+const href = d.status === "coming-soon" ? undefined : `/projects/${p.id}/`;
+const Tag = href ? "a" : "div";
+---
+<Tag class={`card ${d.status === "done" || d.status === "live" ? "top-amber" : d.status === "in-progress" ? "top-blue" : ""}`} href={href} data-cat={d.topics.join(" ")} data-search={`${d.title} ${d.summary} ${d.tags.join(" ")}`.toLowerCase()}>
+  <div class="thumb">{d.cover ? <img src={d.cover} alt="" loading="lazy"> : <span class="ph">{d.status === "coming-soon" ? "Coming soon" : "Photo coming"}</span>}</div>
+  <div class="body">
+    <div class="meta"><span class={`status ${cls}`}>{label}</span>{[...d.topics.map((t: string) => TOPICS[t]), ...d.tags].slice(0, 3).map((t: string) => <span class="tag">{t}</span>)}</div>
+    <h3>{d.title}</h3><p>{d.summary}</p>
+    {meta && <div class="meta"><span>{meta}</span></div>}
+  </div>
+</Tag>

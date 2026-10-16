@@ -1,0 +1,37 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../lib/site";
+
+interface Props { title?: string; description?: string; image?: string; page?: string }
+const { title, description = site.description, image = "/logo.png", page = "" } = Astro.props;
+const fullTitle = title ? `${title} · Midnight Lite` : "Midnight Lite (@midnightlite) · Maker channel: 3D printing, robots, electronics, photography";
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const org = {
+  "@context": "https://schema.org", "@type": "Organization", name: site.name, alternateName: site.handle,
+  url: Astro.site?.href, logo: new URL("/logo.png", Astro.site).href, description: site.description, email: site.email,
+  sameAs: [site.youtube, site.instagram, site.github],
+};
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{fullTitle}</title>
+  <meta name="description" content={description}>
+  <link rel="canonical" href={canonical}>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="alternate" type="application/rss+xml" title="Midnight Lite build log" href="/rss.xml">
+  <meta property="og:type" content="website"><meta property="og:site_name" content="Midnight Lite">
+  <meta property="og:title" content={fullTitle}><meta property="og:description" content={description}>
+  <meta property="og:image" content={new URL(image, Astro.site)}><meta name="twitter:card" content="summary_large_image">
+  {page === "home" && <script type="application/ld+json" set:html={JSON.stringify(org)} />}
+</head>
+<body data-page={page}>
+  <a class="skip" href="#main">Skip to content</a>
+  <Header page={page} />
+  <main id="main"><slot /></main>
+  <Footer />
+</body>
+</html>

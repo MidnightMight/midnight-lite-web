@@ -1,110 +1,56 @@
-# Midnight Lite — Personal Website
+# midnight-lite.com
 
-A personal website built from scratch to showcase side projects, interactive tools, and experiments. The site is both the product **and** the running documentation of its own creation.
+Midnight Lite (@midnightlite): projects, videos and build logs for 3D printing, robots, electronics and photography.
 
-🌐 **Live site:** [midnight-lite.com](https://midnight-lite.com)
-🐙 **Repository:** [github.com/MidnightMight/midnight-lite-web](https://github.com/MidnightMight/midnight-lite-web)
+Built with [Astro](https://astro.build) as a static site, served by Cloudflare and deployed automatically from `main` on GitHub.
 
----
+## Editing content (no code needed)
 
-## Overview
+Open **https://www.midnight-lite.com/admin/** and sign in. The editor ([Sveltia CMS](https://github.com/sveltia/sveltia-cms)) lets you:
 
-The site is split into two layers:
+- write and edit **build log posts** (Markdown, with images),
+- add and update **projects** (status, topics, cover, files, featured on Home),
+- add **videos** to a series, or list planned ones,
+- change the **"Now making" strip**, the **About page**, the **Tools page**, and the site's links, socials and newsletter.
 
-| Layer | Tech | Purpose |
-|---|---|---|
-| Content pages | HTML / CSS / vanilla JS | Fast, lightweight pages — Home, About, Projects, Services, Dev Log |
-| Interactive apps | React + Vite (bundled by Netlify) | Data-heavy tools like the EUC Visualiser |
+Every save is a commit to `main`; Cloudflare rebuilds the site in about a minute.
 
-Hosting and CI/CD is handled by **Netlify** — every push to the main branch auto-deploys.
+**Signing in:** choose **Sign In Using Access Token** and paste a GitHub fine-grained token with *Contents: Read and write* on this repository only (GitHub → Settings → Developer settings → Fine-grained tokens). The editor keeps it in your browser.
+"Sign In with GitHub" needs a small OAuth helper (e.g. [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth) on Cloudflare Workers) and `base_url` set in `public/admin/config.yml`.
 
----
+Uploaded images go to `public/img/uploads/`.
 
-## Tech Stack
+## Where things live
 
-- **HTML5 / CSS3 / Vanilla JavaScript** — all main content pages
-- **React 19** — interactive app components
-- **Vite 6** — dev server and production bundler
-- **React Leaflet** — map rendering in the EUC Visualiser
-- **Recharts** — charting library for data visualisation
-- **MUI (Material UI)** — UI component library
-- **Mermaid.js** — Gantt / diagram rendering on project detail pages
-- **PapaParse** — CSV parsing in the browser
-- **Netlify** — hosting, CI/CD, custom redirects
+| What | File(s) |
+|---|---|
+| Build log posts | `src/content/posts/*.md` (`draft: true` hides a post) |
+| Projects | `src/content/projects/*.md` (`order` sorts, `featured` shows on Home) |
+| Videos (series, planned) | `src/content/videos/*.md`; uploaded videos are also read from the channel's RSS feed at build time |
+| "Now making" strip | `src/data/now.json` |
+| About page | `src/data/about.json` |
+| Tools page | `src/data/tools.json` |
+| Links, socials, newsletter | `src/data/site.json` |
+| Content model | `src/content.config.ts` (keep in sync with `public/admin/config.yml`) |
+| Pages and layout | `src/pages/`, `src/layouts/Base.astro`, `src/components/` |
+| Styles (brand tokens) | `src/styles/global.css` |
+| EUC World visualiser (React) | `src/euc/`, page `src/pages/tools/euc-visualiser.astro` |
+| Contact form backend | `functions/api/contact.js` (Cloudflare Pages Function) |
+| Old URL redirects | `public/_redirects` |
+| Layout prototype + review PDFs | `design/` (not part of the build) |
 
----
+## Setup that lives outside the repo
 
-## Site Map
+- **Contact form:** set `RESEND_API_KEY`, `CONTACT_TO` (and optionally `CONTACT_FROM`) as secrets in the Cloudflare project. Until then the form says it couldn't send and points to the email address.
+- **Newsletter:** put your Buttondown username in `src/data/site.json` (`buttondown`) or in the editor under *Site settings → Links, socials & newsletter*.
+- **New videos:** nothing to do; they're read from the YouTube channel feed on every build. A daily scheduled rebuild (Cloudflare deploy hook) picks them up without a commit.
 
-```
-/
-├── index.html              — Home (hero, animated background, project carousel)
-├── about.html              — About me
-├── projects.html           — Projects grid with category filter & featured card
-│   ├── project1.html       — Website Building from Scratch (this site)
-│   ├── project2.html       — ESP32 Cam for Fun
-│   └── project3.html       — Raspberry Pi Related
-├── Services.html           — Interactive app launcher
-├── euc-visualiser.html     — EUC World data visualiser (React/Vite app)
-├── progress.html           — Dev Log: milestones, changelog, future plans
-├── under-construction.html — Placeholder for in-progress pages
-└── 404.html                — Custom 404 page
-```
+## Local development
 
----
-
-## Current Projects
-
-| # | Project | Status | Category |
-|---|---------|--------|----------|
-| 1 | **Website Building from Scratch** | 🟢 Active | Web |
-| 2 | **ESP32 Cam for Fun** | 🔨 In Progress | Hardware |
-| 3 | **Raspberry Pi Related** | 🔨 In Progress | Hardware |
-
----
-
-## Milestones
-
-| Date | Milestone |
-|------|-----------|
-| 27 Mar 2026 | Agentic AI used to review code, create project pages, and write documentation. Dev Log page (`progress.html`) added to the site. |
-| 27 Mar 2026 | Projects page rebuilt with category filter, featured card, and Gantt timelines |
-| 26 Mar 2025 | EUC World data visualiser deployed (React + Vite + Leaflet + Recharts) |
-| 20 Mar 2025 | Services page and About page added/remade |
-| 1 Jan 2025 | Home page redesigned with parallax hero, animated background, and carousel |
-| 1 Nov 2024 | Core site deployed to Netlify (Home, Projects, About) |
-| 31 Jan 2024 | First prototype — single-page "Coming Soon" |
-
----
-
-## Future Plans
-
-- 🗺️ **Flight Radar / Live Flights Globe** — pull real-time flight data from the FlightAware AeroAPI or open-source ADS-B feeds and project aircraft positions onto an interactive 3D globe (e.g. with CesiumJS or Globe.gl)
-- 🏠 **Smart Home Dashboard** — a web UI to monitor and control smart home sensors and devices (Raspberry Pi / MQTT-based)
-- 📝 **Dev Log sub-pages** — per-entry devlog pages so individual updates can be shared and linked
-- 🔍 **Search** — site-wide search bar on the Projects page
-- 🌙 **Dark / Light mode toggle**
-- 📸 **Real project photos** — replace placeholder Under Construction images with actual shots of the hardware builds
-
----
-
-## Running Locally
-
-```bash
-# Install dependencies
+```sh
 npm install
-
-# Start the dev server (Vite)
-npm run dev
-
-# Production build
-npm run build
+npm run dev      # http://localhost:4321
+npm run build    # -> dist/
 ```
 
-Static HTML pages are served directly by Vite. The React app entry point is `src/euc-visualiser.jsx`, loaded from `euc-visualiser.html`.
-
----
-
-## Deployment
-
-Netlify watches the `main` branch. On every push it runs `npm run build` and publishes the `dist/` folder. A `[[redirects]]` rule in `netlify.toml` sends any unknown URL to the custom `404.html`.
+On the home server, the preview at `http://192.168.1.196:8091/` serves `dist/` (run `npm run build` after changes) and the prototype at `/design/`.
