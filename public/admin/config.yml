@@ -156,6 +156,6 @@ collections:
           - { label: Contact email, name: email, widget: string }
           - { label: YouTube URL, name: youtube, widget: string }
           - { label: YouTube channel ID, name: youtubeChannelId, widget: string, hint: "Used to pull your latest videos automatically." }
-          - { label: Instagram URL, name: instagram, widget: string }
+          - { label: Instagram URL (leave empty to hide), name: instagram, widget: string, required: false }
           - { label: GitHub URL, name: github, widget: string }
           - { label: Buttondown username (newsletter), name: buttondown, widget: string, required: false }
