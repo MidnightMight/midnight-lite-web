@@ -15,16 +15,12 @@ Open **https://www.midnight-lite.com/admin/** and sign in. The editor ([Sveltia 
 
 Every save is a commit to `main`; Cloudflare rebuilds the site in about a minute.
 
-**Signing in:** click **Sign In with GitHub** and log in with the GitHub account that owns this repository. Only accounts with write access to the repo can save.
-This uses a small login helper, [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth), running as a free Cloudflare Worker. One-time setup:
+**Signing in:** choose **Sign In Using Access Token** and paste a GitHub fine-grained personal access token:
+GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → *Generate new token*,
+*Only select repositories* → `midnight-lite-web`, *Repository permissions* → **Contents: Read and write**.
+The editor keeps the token in that browser, so only sign in on your own devices. When the token expires, make a new one and sign in again.
 
-1. Deploy the Worker: open the sveltia-cms-auth README and click **Deploy to Cloudflare**. Note its URL, e.g. `https://sveltia-cms-auth.<your-subdomain>.workers.dev`.
-2. On GitHub: Settings → Developer settings → OAuth Apps → **New OAuth App**.
-   Homepage URL `https://www.midnight-lite.com`, Authorization callback URL `<worker URL>/callback`. Create a client secret.
-3. In Cloudflare, on the Worker: Settings → Variables and secrets, add `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` (secret) and `ALLOWED_DOMAINS` = `www.midnight-lite.com`.
-4. In `public/admin/config.yml`, uncomment `base_url` and set it to the Worker URL.
-
-Until then (or as a fallback) choose **Sign In Using Access Token** with a GitHub fine-grained token that has *Contents: Read and write* on this repository only.
+("Sign In with GitHub" would need an OAuth helper such as [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth) and `base_url` in `public/admin/config.yml`; not needed for a single editor.)
 
 Uploaded images go to `public/img/uploads/`.
 
