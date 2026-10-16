@@ -1,0 +1,14 @@
+@import url("../assets/site.css");
+body { background: #fffbf4; }
+.sheet { max-width: 1160px; margin: 0 auto; padding: 48px 40px 56px; }
+.sheet h1 { font-size: 3rem; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 8px; font-size: .97rem; background: #fff; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--blue); color: #fff; font-family: var(--font-head); font-weight: 800; letter-spacing: .02em; }
+tr:nth-child(2n) td { background: #fffaf0; }
+.legend span { display: inline-block; margin-right: 14px; }
+.badge { background: #ff4081; color: #fff; font: 800 .8rem var(--font-mono); padding: 3px 8px; border-radius: 6px; }
+.dec { border: 1px solid var(--line); border-left: 6px solid var(--amber); background: #fff; border-radius: 10px; padding: 14px 18px; margin: 12px 0; }
+.dec h3 { margin: 0 0 6px; }
+.dec .rec { color: var(--blue); font-weight: 700; }
+.box { display: inline-block; width: 16px; height: 16px; border: 2px solid #111; border-radius: 3px; vertical-align: -3px; margin-right: 6px; }

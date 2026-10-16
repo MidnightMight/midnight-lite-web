@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Picking a coil driver that won't cook itself · Midnight Lite</title>
+<link rel="icon" href="assets/img/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="blog">
+<header data-include></header>
+
+<section class="page-hero" data-sec="A1">
+  <div class="wrap prose" style="max-width:860px">
+    <p class="eyebrow"><a href="blog.html">Build log</a> · Electric · <a href="project.html">Ferrofluid display</a></p>
+    <h1 style="font-size:clamp(2rem,5vw,3rem)">Picking a coil driver that won't cook itself</h1>
+    <p class="muted">12 Oct 2026 · 6 min read · by Midnight Lite</p>
+    <div class="rv"><b>A1 post header.</b> Title, date, reading time, and which project/series it belongs to.</div>
+  </div>
+</section>
+
+<section style="padding-top:20px">
+  <div class="wrap" style="max-width:860px">
+    <article class="prose" data-sec="A2">
+      <div class="video-frame"><span class="play"></span><span class="cap">Related video (optional)</span></div>
+      <p style="margin-top:18px">[Placeholder] Intro paragraph: what this post is about and what you'll learn.</p>
+      <h2>The problem</h2>
+      <p>[Placeholder] Each electromagnet pulls about 1.5 A. Switch that fast with the wrong part and it gets hot quickly.</p>
+      <h2>The maths</h2>
+      <p>[Placeholder] Power lost in the MOSFET: <code>P = I² × R<sub>DS(on)</sub> = 1.5² × 0.035 = 0.08 W</code>. Easily fine without a heatsink.</p>
+      <div class="figure">Scope capture / photo</div>
+      <blockquote>Tip: [placeholder] always add the flyback diode. Ask me how I know.</blockquote>
+      <h2>What's next</h2>
+      <p>[Placeholder] Link to the next post or video in the series.</p>
+    </article>
+    <div class="rv"><b>A2 article.</b> Readable width, code/maths styling, images, optional video embed at the top. Written in Markdown later (no HTML needed for new posts).</div>
+
+    <div class="panel" data-sec="A3" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:28px 0">
+      <a href="post.html">← Previous: First schematic and the parts list</a><a href="post.html">Next: [coming soon] →</a>
+    </div>
+    <div class="rv"><b>A3 series navigation.</b> Previous / next within the same project or series.</div>
+
+    <div class="comments" data-sec="A4">
+      <h2>Discussion (4)</h2>
+      <div class="c"><div class="avatar">KT</div><div><b>kt_builds</b> <span class="muted">· 3 days ago</span><p>Would a logic-level MOSFET work straight from the ESP32 pins?</p></div></div>
+      <div class="c"><div class="avatar a2">ML</div><div><b>Midnight Lite</b> <span class="tag">author</span> <span class="muted">· 3 days ago</span><p>Yes, at 3.3 V gate drive the IRLZ44N is fine for this current. I'll show it in Ep. 2.</p></div></div>
+      <p style="margin-top:14px"><textarea placeholder="Join the discussion…"></textarea></p>
+      <button class="btn blue">Post comment</button>
+    </div>
+    <div class="rv"><b>A4 discussion.</b> Same comment system as project pages. You get notified, can reply as the author, and moderate.</div>
+  </div>
+</section>
+
+<footer data-include></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>
