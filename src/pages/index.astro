@@ -61,7 +61,7 @@ const topics = [
         <div class="btns"><a class="btn yt" href={latest?.id && feed[0] ? `https://www.youtube.com/watch?v=${latest.id}` : site.youtube}>▶ {feed[0] ? "Watch" : "Subscribe"}</a>{latest?.post && <a class="btn line" href={`/blog/${latest.post}/`}>Read the build log</a>}</div>
         <div class="panel amber" style="margin-top:22px">
           <h3>Don't miss the next one</h3>
-          <p style="margin:0">New videos and build logs, about twice a month. No spam.</p>
+          <p style="margin:0">{site.buttondown ? "New videos and build logs by email, about twice a month. No spam." : "Subscribe on YouTube and you'll see the next build first."}</p>
           <Subscribe />
         </div>
       </div>

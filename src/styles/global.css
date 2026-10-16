@@ -182,8 +182,6 @@ a.card:hover { text-decoration: none; transform: translateY(-3px); box-shadow: 0
 /* additions for the Astro build */
 .yt-embed { aspect-ratio: 16/9; width: 100%; border: 3px solid var(--ink); border-radius: var(--radius); background: #000; }
 .ask { border-left: 6px solid #e62117; }
-.honeypot { position: absolute; left: -9999px; }
-.form-msg { margin-top: 10px; font-weight: 600; }
 .skip { position: absolute; left: -9999px; } .skip:focus { left: 12px; top: 12px; z-index: 50; background: var(--amber); color: #111; padding: 8px 12px; border-radius: 8px; }
 .empty { padding: 28px; text-align: center; color: var(--muted); border: 2px dashed var(--line); border-radius: var(--radius); }
 

@@ -15,8 +15,16 @@ Open **https://www.midnight-lite.com/admin/** and sign in. The editor ([Sveltia 
 
 Every save is a commit to `main`; Cloudflare rebuilds the site in about a minute.
 
-**Signing in:** choose **Sign In Using Access Token** and paste a GitHub fine-grained token with *Contents: Read and write* on this repository only (GitHub → Settings → Developer settings → Fine-grained tokens). The editor keeps it in your browser.
-"Sign In with GitHub" needs a small OAuth helper (e.g. [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth) on Cloudflare Workers) and `base_url` set in `public/admin/config.yml`.
+**Signing in:** click **Sign In with GitHub** and log in with the GitHub account that owns this repository. Only accounts with write access to the repo can save.
+This uses a small login helper, [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth), running as a free Cloudflare Worker. One-time setup:
+
+1. Deploy the Worker: open the sveltia-cms-auth README and click **Deploy to Cloudflare**. Note its URL, e.g. `https://sveltia-cms-auth.<your-subdomain>.workers.dev`.
+2. On GitHub: Settings → Developer settings → OAuth Apps → **New OAuth App**.
+   Homepage URL `https://www.midnight-lite.com`, Authorization callback URL `<worker URL>/callback`. Create a client secret.
+3. In Cloudflare, on the Worker: Settings → Variables and secrets, add `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` (secret) and `ALLOWED_DOMAINS` = `www.midnight-lite.com`.
+4. In `public/admin/config.yml`, uncomment `base_url` and set it to the Worker URL.
+
+Until then (or as a fallback) choose **Sign In Using Access Token** with a GitHub fine-grained token that has *Contents: Read and write* on this repository only.
 
 Uploaded images go to `public/img/uploads/`.
 
@@ -35,14 +43,13 @@ Uploaded images go to `public/img/uploads/`.
 | Pages and layout | `src/pages/`, `src/layouts/Base.astro`, `src/components/` |
 | Styles (brand tokens) | `src/styles/global.css` |
 | EUC World visualiser (React) | `src/euc/`, page `src/pages/tools/euc-visualiser.astro` |
-| Contact form backend | `functions/api/contact.js` (Cloudflare Pages Function) |
 | Old URL redirects | `public/_redirects` |
 | Layout prototype + review PDFs | `design/` (not part of the build) |
 
 ## Setup that lives outside the repo
 
-- **Contact form:** set `RESEND_API_KEY`, `CONTACT_TO` (and optionally `CONTACT_FROM`) as secrets in the Cloudflare project. Until then the form says it couldn't send and points to the email address.
-- **Newsletter:** put your Buttondown username in `src/data/site.json` (`buttondown`) or in the editor under *Site settings → Links, socials & newsletter*.
+- **Contact:** the Contact page just shows the email address from `src/data/site.json` (`email`). No form backend.
+- **Newsletter:** put your Buttondown username in `src/data/site.json` (`buttondown`) or in the editor under *Site settings → Links, socials & newsletter*. While it's empty, the newsletter boxes show a "Subscribe on YouTube" button instead.
 - **New videos:** nothing to do; they're read from the YouTube channel feed on every build. A daily scheduled rebuild (Cloudflare deploy hook) picks them up without a commit.
 
 ## Local development

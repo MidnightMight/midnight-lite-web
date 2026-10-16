@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import PostCard from "../../components/PostCard.astro";
+import { site } from "../../lib/site";
 import Subscribe from "../../components/Subscribe.astro";
 import { TOPICS } from "../../lib/site";
 
@@ -28,7 +29,7 @@ const used = [...new Set(posts.map((p) => p.data.topic))];
       <aside class="side">
         <div class="panel"><h3>Search</h3><input class="search" type="search" placeholder="Search posts…" style="width:100%;min-width:0" aria-label="Search posts"></div>
         {series.length > 0 && <div class="panel"><h3>Series</h3>{series.map(([id, t, n]) => <a href={`/projects/${id}/`} style="display:block">{t} ({n})</a>)}</div>}
-        <div class="panel amber"><h3>Get new posts</h3><p style="margin:0">New posts and videos by email, about twice a month.</p><Subscribe small /></div>
+        <div class="panel amber"><h3>Get new posts</h3><p style="margin:0">{site.buttondown ? "New posts and videos by email, about twice a month." : "New videos land on YouTube first. Subscribe there to catch them."}</p><Subscribe small /></div>
       </aside>
     </div>
   </section>

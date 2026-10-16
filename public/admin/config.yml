@@ -1,10 +1,13 @@
 # Admin editor for midnight-lite.com (Sveltia CMS, Decap-compatible config).
-# Open https://www.midnight-lite.com/admin/ and sign in with a GitHub token (see README "Editing content").
+# Open https://www.midnight-lite.com/admin/ and sign in with GitHub (see README "Editing content").
 # Every save is a commit to `main` on GitHub; Cloudflare rebuilds the site in about a minute.
 backend:
   name: github
   repo: MidnightMight/midnight-lite-web
   branch: main
+  # "Sign In with GitHub" goes through the sveltia-cms-auth Cloudflare Worker (README "Signing in").
+  # Uncomment and put the Worker's URL here once it is deployed:
+  # base_url: https://sveltia-cms-auth.<your-subdomain>.workers.dev
   commit_messages:
     create: "Add {{collection}} “{{slug}}” (admin editor)"
     update: "Update {{collection}} “{{slug}}” (admin editor)"
