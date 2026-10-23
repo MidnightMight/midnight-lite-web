@@ -131,17 +131,22 @@ const jsonld = [
           </fieldset>
           <fieldset>
             <legend>Breaks</legend>
-            <div class="seg" data-pref="breaks">
-              <button type="button" data-v="none">None</button>
-              <button type="button" data-v="30">About every 30 min</button>
-              <button type="button" data-v="60">About every hour</button>
+            <p class="pmd-sublabel" id="pmd-brk-often">How often (riding time between breaks)</p>
+            <div class="seg" data-pref="breaks" role="group" aria-labelledby="pmd-brk-often">
+              <button type="button" data-v="none">No breaks</button>
+              <button type="button" data-v="30">Every 30 min</button>
+              <button type="button" data-v="60">Every hour</button>
             </div>
-            <div class="seg" data-pref="breakMin" style="margin-top:6px" role="group" aria-label="Break length">
-              <button type="button" data-v="5">5 min</button>
-              <button type="button" data-v="10">10 min</button>
-              <button type="button" data-v="15">15 min</button>
+            <div id="pmd-brk-len-row">
+              <p class="pmd-sublabel" id="pmd-brk-len">How long each break lasts</p>
+              <div class="seg" data-pref="breakMin" role="group" aria-labelledby="pmd-brk-len">
+                <button type="button" data-v="5">5 min</button>
+                <button type="button" data-v="10">10 min</button>
+                <button type="button" data-v="15">15 min</button>
+              </div>
             </div>
-            <p class="hint">Stops at the best rest stop nearby (rated out of 5 stars for toilets, water, shelter and seats). The break length is added to the time.</p>
+            <p class="hint">Each break is at the best rest stop near that point (rated out of 5 stars for toilets, water, shelter
+              and seats), and its length is added to the trip time. Short rides may not need one.</p>
           </fieldset>
           <fieldset>
             <legend>Footpaths <span class="hint" id="pmd-foot-hint"></span></legend>
@@ -171,6 +176,7 @@ const jsonld = [
             <input type="range" id="pmd-speed" min="10" max="25" step="1" value="20"></label>
           <label class="pmd-range" id="pmd-wh-row">Battery use on the flat <output id="pmd-wh-out">15</output> Wh/km
             <input type="range" id="pmd-wh" min="5" max="40" step="1" value="15"></label>
+          <button type="button" class="pmd-reset" id="pmd-reset">Reset options to defaults</button>
         </details>
 
         <details class="pmd-rules" id="pmd-rules">
@@ -304,6 +310,8 @@ const jsonld = [
   .seg button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
   .seg-mode { flex-wrap: nowrap; }
   .seg-mode button { flex: 1; padding: 0 6px; font-size: 13px; }
+  .pmd-sublabel { font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+  .pmd-reset { border: 0; background: none; color: var(--blue); font-size: 13px; cursor: pointer; padding: 0 0 12px; }
   .hint { font-size: 12px; color: var(--muted); font-weight: 400; margin: 6px 0 0; }
   .pmd-check, .pmd-range { display: flex; align-items: center; gap: 8px; font-size: 14px; margin: 0 0 12px; flex-wrap: wrap; }
   .pmd-check input { width: 22px; height: 22px; }
@@ -402,7 +410,7 @@ const jsonld = [
   const MODES = {
     bike: { label: "bicycles", speed: 22, max: 35, roads: "bikeways", foot: "(give way to pedestrians)" },
     ebike: { label: "e-bikes", speed: 25, max: 35, roads: "bikeways", wh: 8, foot: "(12 km/h limit)" },
-    pmd: { label: "e-scooters, EUCs and e-skateboards", speed: 20, max: 25, roads: "avoid", wh: 15, foot: "(12 km/h limit)" },
+    pmd: { label: "e-scooters, EUCs and e-skateboards", speed: 20, max: 25, roads: "bikeways", wh: 15, foot: "(12 km/h limit)" },
   };
   // What the planner does with each kind of path/road, per ride type: [type, allowed, treatment].
   // allowed: "yes" | "no" | "maybe". Keep in line with build.py (legality) and router.worker.js (costs).
@@ -461,7 +469,8 @@ const jsonld = [
       ["StreetSmarts: 12 km/h footpath limit for e-bikes from 1 July 2026", "https://tmr.qld.gov.au/e-bikes-e-scooters/", ""],
       ["Translink: bikes on CityCats and ferries", "https://translink.com.au/travel-with-us/cycling-and-walking", ""]],
   };
-  const BASE = { roads: "avoid", footpaths: "normal", surface: "good", noBikeSigns: "avoid", hills: "some", ferries: "use", breaks: "none", breakMin: "10", lit: false };
+  // defaults: bikeways first, some hills, some footpaths, a 10 min break about every hour
+  const BASE = { roads: "bikeways", footpaths: "normal", surface: "good", noBikeSigns: "avoid", hills: "some", ferries: "use", breaks: "60", breakMin: "10", lit: false };
   const ROADS_HINT = { pmd: "Roads over 60 km/h are never used.", bike: "\"Any legal road\" includes fast roads; the others keep you off them.", ebike: "\"Any legal road\" includes fast roads; the others keep you off them." };
 
   const $ = (id) => document.getElementById(id);
@@ -641,14 +650,28 @@ const jsonld = [
     $("pmd-vias").lastElementChild.querySelector("input").focus();
   };
 
+  // "Use my location": browsers only share it on secure (https) pages and after the visitor allows it; say which
+  // problem it is, and retry once with the quicker network-based fix if GPS is slow (e.g. indoors)
   $("pmd-locate").onclick = () => {
     if (!navigator.geolocation) { say("This browser can't share your location.", true); return; }
+    if (!window.isSecureContext) {
+      say("Your location only works on a secure page (an address starting with https://). It works on midnight-lite.com.", true);
+      return;
+    }
     say("Finding you…");
-    navigator.geolocation.getCurrentPosition(
-      (p) => { const ll = [p.coords.latitude, p.coords.longitude]; setPoint("a", ll, "My location"); map.setView(ll, 15); },
-      () => say("Couldn't get your location. Check the browser's location permission.", true),
-      { enableHighAccuracy: true, timeout: 10000 });
+    const ok = (p) => {
+      const ll = [p.coords.latitude, p.coords.longitude];
+      say(pts.b ? "" : "Got you. Now set the finish (B): search or tap the map.");
+      setPoint("a", ll, "My location"); map.setView(ll, 15);
+    };
+    const fail = (err, retried) => {
+      if (err.code === err.PERMISSION_DENIED) say("Location is blocked for this site. Allow it in your browser's site settings (on an iPhone, also check Settings > Privacy & Security > Location Services > Safari Websites), then try again.", true);
+      else if (!retried) navigator.geolocation.getCurrentPosition(ok, (e) => fail(e, true), { enableHighAccuracy: false, timeout: 20000, maximumAge: 120000 });
+      else say(err.code === err.TIMEOUT ? "Finding your location took too long. Try again with Wi-Fi or location services on." : "Your device couldn't work out where you are. Check that location services are on.", true);
+    };
+    navigator.geolocation.getCurrentPosition(ok, (e) => fail(e, false), { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
   };
+
   $("pmd-swap").onclick = () => {
     const la = input("a").value, lb = input("b").value;
     [pts.a, pts.b] = [pts.b, pts.a];
@@ -668,6 +691,7 @@ const jsonld = [
     $("pmd-speed").max = M.max; $("pmd-speed").value = prefs.speed; $("pmd-speed-out").value = prefs.speed;
     $("pmd-wh-row").hidden = !M.wh; $("pmd-wh").value = prefs.wh; $("pmd-wh-out").value = prefs.wh;
     $("pmd-nobike-row").hidden = mode !== "pmd";
+    $("pmd-brk-len-row").hidden = prefs.breaks === "none";
     $("pmd-roads-hint").textContent = ROADS_HINT[mode];
     $("pmd-foot-hint").textContent = M.foot;
     $("pmd-rules-mode").textContent = M.label;
@@ -700,6 +724,7 @@ const jsonld = [
   $("pmd-speed").onchange = () => prefsChanged();
   $("pmd-wh").oninput = (e) => { prefs.wh = +e.target.value; $("pmd-wh-out").value = prefs.wh; if (last) draw(last, false); };
   $("pmd-wh").onchange = () => store.set(`ride-prefs-${mode}`, prefs);
+  $("pmd-reset").onclick = () => { prefs = defaults(mode); prefsChanged(); };
   function prefsChanged() { store.set(`ride-prefs-${mode}`, prefs); syncControls(); plan(); }
 
   // mobile bottom sheet
