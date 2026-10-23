@@ -16,7 +16,7 @@ let G = null; // decoded graph
 
 function decode(buf) {
   const b = new Uint8Array(buf);
-  if (String.fromCharCode(b[0], b[1], b[2], b[3]) !== "PMD5") throw new Error("Unknown map data format");
+  if (String.fromCharCode(b[0], b[1], b[2], b[3]) !== "PMD6") throw new Error("Unknown map data format");
   let p = 4;
   const next = () => { // zigzag varint (values here stay well inside 2^53)
     let v = 0, s = 1, c;
@@ -47,6 +47,14 @@ function decode(buf) {
   }
   const names = new Array(next()), utf8 = new TextDecoder();
   for (let i = 0; i < names.length; i++) { const l = next(); names[i] = utf8.decode(b.subarray(p, p + l)); p += l; }
+  // rest spots (water, toilets, shelter, bench, picnic table, cafe, repair station) beside usable ways
+  const np = next(), plat = new Int32Array(np), plon = new Int32Array(np), pmask = new Uint8Array(np), pname = new Uint32Array(np);
+  acc = 0; for (let i = 0; i < np; i++) plat[i] = acc += next();
+  acc = 0; for (let i = 0; i < np; i++) plon[i] = acc += next();
+  for (let i = 0; i < np; i++) pmask[i] = next();
+  for (let i = 0; i < np; i++) pname[i] = next();
+  const pgrid = new Map(); // ~55 m cells
+  for (let i = 0; i < np; i++) { const k = Math.floor(plat[i] / 500) * 1000000 + Math.floor(plon[i] / 500); let a = pgrid.get(k); if (!a) pgrid.set(k, a = []); a.push(i); }
   // adjacency (CSR). adjR bit 0: traversed to->from; bit 1: that's against a one-way (bicycles only, F_CONTRA)
   const back = (i) => !(cf[i] >> 4 & F_ONEWAY) || (cf[i] >> 4 & F_CONTRA);
   const deg = new Uint32Array(n + 1);
@@ -67,7 +75,8 @@ function decode(buf) {
   for (let i = 0; i < m; i++) { const a = root(from[i]), c = root(to[i]); if (a !== c) parent[a] = c; }
   const size = new Int32Array(n); for (let i = 0; i < n; i++) size[root(i)]++;
   const big = new Uint8Array(n); for (let i = 0; i < n; i++) big[i] = size[root(i)] >= MIN_PIECE ? 1 : 0;
-  return { n, m, lat, lon, z, from, to, len, cf, up, down, wait, name, names, goff, geom, deg, adjE, adjR, grid, big };
+  return { n, m, lat, lon, z, from, to, len, cf, up, down, wait, name, names, goff, geom, deg, adjE, adjR, grid, big,
+    plat, plon, pmask, pname, pgrid };
 }
 
 // ---- costs ----
@@ -243,11 +252,50 @@ function directions(segs, total) {
     else if (g.cat === CAT.CROSSING) text = Math.abs(angle) < 25 ? "Cross the road" : `${turnWord(angle)} and cross the road`;
     else text = `${turnWord(angle)} onto ${g.label}`;
     if (g.crossings) text += ` (crosses ${g.crossings} road${g.crossings > 1 ? "s" : ""})`;
-    out.push({ text, metres: g.metres, at: g.at, idx: g.idx, heading: g.b0, angle, dist: at, cat: g.cat, crossings: g.crossings, d: g.d });
+    out.push({ text, label: g.label, metres: g.metres, at: g.at, idx: g.idx, heading: g.b0, angle, dist: at, cat: g.cat, crossings: g.crossings, d: g.d });
     at += g.metres;
   });
   out.push({ text: "Arrive", metres: 0, at: null, idx: -1, heading: 0, angle: 0, dist: total, cat: -1 });
   return out;
+}
+
+// ---- rest spots along the route ----
+// Walk the route every ~20 m, collect rest spots within 40 m, then merge spots close together (a park's toilets,
+// bubbler and bench become one stop). Returns [{d (m along route), i (route point index), at, mask, name}].
+const SPOT_SCORE = { 1: 3, 2: 3, 4: 2, 8: 1, 16: 1.5, 32: 2, 64: 1 };
+function spotsAlong(G, pts) {
+  const hit = new Map(); // poi -> [d, i, offset]
+  let d = 0;
+  const probe = (la, lo, dd, i) => {
+    const L = la * 1e6, O = lo * 1e6, c0 = Math.floor(L / 500), c1 = Math.floor(O / 500);
+    for (let y = c0 - 1; y <= c0 + 1; y++) for (let x = c1 - 1; x <= c1 + 1; x++) {
+      for (const q of G.pgrid.get(y * 1000000 + x) || []) {
+        const off = Math.hypot((G.plat[q] - L) * 0.1113, (G.plon[q] - O) * 0.1113 * Math.cos(la * D2R));
+        if (off <= 40 && (!hit.has(q) || hit.get(q)[2] > off)) hit.set(q, [dd, i, off]);
+      }
+    }
+  };
+  for (let i = 0; i < pts.length; i++) {
+    if (i) {
+      const [a, b] = [pts[i - 1], pts[i]], seg = Math.hypot((b[0] - a[0]) * 111320, (b[1] - a[1]) * 111320 * Math.cos(a[0] * D2R));
+      for (let t = 20; t < seg; t += 20) probe(a[0] + (b[0] - a[0]) * t / seg, a[1] + (b[1] - a[1]) * t / seg, d + t, i - 1);
+      d += seg;
+    }
+    probe(pts[i][0], pts[i][1], d, i);
+  }
+  const list = [...hit].map(([q, [dd, i]]) => ({ q, d: dd, i })).sort((x, y) => x.d - y.d);
+  const spots = [];
+  for (const h of list) {
+    const last = spots[spots.length - 1], m = G.pmask[h.q];
+    if (last && h.d - last.d0 < 80) { // same stop: add its facilities; the best-scoring item marks the spot
+      last.mask |= m;
+      if ((SPOT_SCORE[m] || 0) > last.best) { last.best = SPOT_SCORE[m] || 0; last.at = [G.plat[h.q] * 1e-6, G.plon[h.q] * 1e-6]; }
+      if (!last.name && G.names[G.pname[h.q]]) last.name = G.names[G.pname[h.q]];
+      continue;
+    }
+    spots.push({ d0: h.d, d: h.d, i: h.i, mask: m, best: SPOT_SCORE[m] || 0, at: [G.plat[h.q] * 1e-6, G.plon[h.q] * 1e-6], name: G.names[G.pname[h.q]] || "" });
+  }
+  return spots.map(({ d, i, mask, at, name }) => ({ d, i, mask, at, name }));
 }
 
 // Expand a path into coordinates, per-category runs, an elevation profile and stats.
@@ -323,12 +371,29 @@ self.onmessage = async ({ data }) => {
       if (!G) throw new Error("Map data isn't loaded yet");
       const t0 = performance.now();
       const T = costTable(data.prefs);
-      const s = snap(G, data.a[0], data.a[1], T, data.prefs), t = snap(G, data.b[0], data.b[1], T, data.prefs);
-      if (s < 0 || t < 0) { self.postMessage({ type: "route", id: data.id, error: `No rideable path near the ${s < 0 ? "start" : "finish"}.` }); return; }
-      if (s === t) { self.postMessage({ type: "route", id: data.id, error: "Start and finish are at the same spot." }); return; }
-      const r = astar(G, s, t, T, data.prefs);
-      if (!r.steps) { self.postMessage({ type: "route", id: data.id, error: "No legal route found with these options. Try allowing more road types or rougher surfaces." }); return; }
-      const out = describe(G, r.steps, data.prefs);
+      // multi-stop: start, any stops, finish -> one A* per leg, joined into a single route
+      const pts = data.points || [data.a, data.b], where = (i) => i === 0 ? "start" : i === pts.length - 1 ? "finish" : `stop ${i}`;
+      const snapped = [];
+      for (let i = 0; i < pts.length; i++) {
+        const v = snap(G, pts[i][0], pts[i][1], T, data.prefs);
+        if (v < 0) { self.postMessage({ type: "route", id: data.id, error: `No rideable path near the ${where(i)}.` }); return; }
+        snapped.push(v);
+      }
+      const steps = [], vias = [];
+      let visited = 0, metres = 0;
+      for (let i = 0; i + 1 < snapped.length; i++) {
+        if (snapped[i] === snapped[i + 1]) { if (i + 1 < snapped.length - 1) vias.push({ n: i + 1, d: metres }); continue; }
+        const r = astar(G, snapped[i], snapped[i + 1], T, data.prefs);
+        visited += r.visited;
+        if (!r.steps) { self.postMessage({ type: "route", id: data.id, error: `No legal route found from the ${where(i)} to the ${where(i + 1)} with these options. Try allowing more road types or rougher surfaces.` }); return; }
+        for (const st of r.steps) { steps.push(st); metres += G.len[st[0]]; }
+        if (i + 1 < snapped.length - 1) vias.push({ n: i + 1, d: metres });
+      }
+      if (!steps.length) { self.postMessage({ type: "route", id: data.id, error: "Start and finish are at the same spot." }); return; }
+      const out = describe(G, steps, data.prefs);
+      out.spots = spotsAlong(G, out.pts);
+      out.vias = vias;
+      const r = { visited };
       self.postMessage({ type: "route", id: data.id, ...out, ms: Math.round(performance.now() - t0), visited: r.visited });
     }
   } catch (err) {

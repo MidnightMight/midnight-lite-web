@@ -167,14 +167,38 @@ def is_bridge(t):
     return t.get("bridge") not in (None, "no") or t.get("tunnel") not in (None, "no") or t.get("man_made") == "bridge"
 
 
+# Rest spots for breaks and for where Google Maps parts hand over (somewhere to pull off the path).
+# Bit mask per spot; the browser merges spots that are close together.
+POI = {("amenity", "drinking_water"): 1, ("amenity", "toilets"): 2, ("amenity", "shelter"): 4, ("amenity", "bench"): 8,
+       ("leisure", "picnic_table"): 16, ("amenity", "cafe"): 32, ("amenity", "bicycle_repair_station"): 64}
+
+
+def poi_mask(t):
+    if t.get("access") in NO or (t.get("access") == "customers" and t.get("amenity") == "toilets"):
+        return 0
+    return sum(m for (k, v), m in POI.items() if t.get(k) == v)
+
+
 class Ways(osmium.SimpleHandler):
     def __init__(self):
         super().__init__()
-        self.ways = []          # (cat, flags, bridge, [node ids])
+        self.ways = []          # (cat, flags, bridge, [node ids], wait, name)
         self.uses = {}
         self.coords = {}
+        self.pois = []          # (lat, lon, mask, name)
+
+    def node(self, n):
+        m = poi_mask(n.tags) if len(n.tags) else 0
+        if m and n.location.valid():
+            self.pois.append((n.location.lat, n.location.lon, m, n.tags.get("name", "")))
 
     def way(self, w):
+        m = poi_mask(w.tags) if "highway" not in w.tags else 0
+        if m:   # toilet blocks, shelters etc. mapped as buildings: use the middle of the outline
+            pts = [(n.location.lat, n.location.lon) for n in w.nodes if n.location.valid()]
+            if pts:
+                self.pois.append((sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts), m, w.tags.get("name", "")))
+            return
         c = classify(w.tags)
         if not c:
             return
@@ -314,8 +338,26 @@ def main(src, demdir, out):
                                   int(up * 10 + 0.5), int(down * 10 + 0.5), wait, names.setdefault(name, len(names))))
                 start = i
     link_ferries(h, vid, vlat, vlon, edges, names)
+    pois = near_paths(h, names)
     print("vertices", len(vlat), "edges", len(edges), "geom pts", len(geom))
-    write(out, vlat, vlon, vz, edges, geom, names)
+    write(out, vlat, vlon, vz, edges, geom, names, pois)
+
+
+def near_paths(h, names, reach_cells=1):
+    """Keep rest spots within ~40 m of any node of a usable way (so they're actually beside the route)."""
+    grid = set()
+    for w in h.ways:
+        for nid in w[3]:
+            la, lo = h.coords.get(nid, (None, None))
+            if la is not None:
+                grid.add((int(la * 2500), int(lo * 2500)))   # ~44 m cells
+    out = []
+    for la, lo, m, nm in h.pois:
+        cy, cx = int(la * 2500), int(lo * 2500)
+        if any((cy + dy, cx + dx) in grid for dy in (-reach_cells, 0, reach_cells) for dx in (-reach_cells, 0, reach_cells)):
+            out.append((round(la * 1e6), round(lo * 1e6), m, names.setdefault(nm, len(names))))
+    print("rest spots", len(h.pois), "near paths", len(out))
+    return sorted(out)
 
 
 def link_ferries(h, vid, vlat, vlon, edges, names):
@@ -377,7 +419,7 @@ def varints(vals, out):
         out.append(v)
 
 
-def write(out, vlat, vlon, vz, edges, geom, names):
+def write(out, vlat, vlon, vz, edges, geom, names, pois):
     # spatial order: sort vertices by a 0.01 deg grid cell, then lon, so neighbours have close ids
     n = len(vlat)
     order = sorted(range(n), key=lambda i: (vlat[i] // 10000, vlon[i] // 10000, vlon[i], vlat[i]))
@@ -390,7 +432,7 @@ def write(out, vlat, vlon, vz, edges, geom, names):
         pts = [(vlat[a], vlon[a])] + geom[g0:g0 + gn] + [(vlat[b], vlon[b])]
         E.append((new[a], new[b], L, cat, flags, dp(pts, 1.5), up, down, wait, nm))
     E.sort(key=lambda e: (e[0], e[1]))
-    buf = bytearray(b"PMD5")
+    buf = bytearray(b"PMD6")
     cols = [
         [lat[0]] + [lat[i] - lat[i - 1] for i in range(1, n)],
         [lon[0]] + [lon[i] - lon[i - 1] for i in range(1, n)],
@@ -419,6 +461,12 @@ def write(out, vlat, vlon, vz, edges, geom, names):
     varints([len(table)], buf)
     for nm in table:
         b = nm.encode("utf-8"); varints([len(b)], buf); buf += b
+    # rest spots: count, then lat/lon deltas (sorted by lat), type mask, name index
+    varints([len(pois)], buf)
+    varints([pois[0][0]] + [pois[i][0] - pois[i - 1][0] for i in range(1, len(pois))], buf)
+    varints([pois[0][1]] + [pois[i][1] - pois[i - 1][1] for i in range(1, len(pois))], buf)
+    varints([p[2] for p in pois], buf)
+    varints([p[3] for p in pois], buf)
     with gzip.open(out, "wb", compresslevel=9) as f:
         f.write(bytes(buf))
     json.dump({"vertices": n, "edges": len(E), "geom": len(g) // 2, "raw_bytes": len(buf),
