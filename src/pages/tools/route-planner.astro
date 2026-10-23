@@ -19,8 +19,14 @@ const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
   <div class="pmd" id="pmd" data-graph={GRAPH.url} data-email={site.email} data-checked={RULES_CHECKED} data-osm={GRAPH.date}>
     <div class="pmd-map" id="pmd-map" aria-label="Map. Tap to set start or finish."></div>
 
+    <button class="pmd-tab" id="pmd-tab" type="button" aria-label="Expand the planner to full width" aria-expanded="false" title="Expand">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
     <div class="pmd-panel" id="pmd-panel">
-      <button class="pmd-grip" id="pmd-grip" type="button" aria-label="Show or hide the planner"><span></span></button>
+      <div class="pmd-griprow">
+        <button class="pmd-grip" id="pmd-grip" type="button" aria-label="Show or hide the planner"><span></span></button>
+        <button class="pmd-full" id="pmd-full" type="button" aria-expanded="false">Full screen</button>
+      </div>
 
       <!-- step 1: how are you riding? (shown until a mode is picked) -->
       <div class="pmd-modepick" id="pmd-modepick" hidden>
@@ -154,7 +160,21 @@ const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
     box-shadow: 0 8px 30px rgb(0 0 0 / .18); padding: 14px; display: flex; flex-direction: column; gap: 10px;
   }
   .pmd-main { display: flex; flex-direction: column; gap: 10px; flex: 1; }
-  .pmd-grip { display: none; }
+  .pmd-grip, .pmd-griprow { display: none; }
+  /* expand control: a tab on the panel's right edge (desktop) / a button by the sheet handle (phone) */
+  .pmd-tab { position: absolute; z-index: 1001; left: 396px; top: 50%; transform: translateY(-50%); width: 28px; height: 64px;
+    border: 1px solid var(--line); border-left: 0; border-radius: 0 10px 10px 0; background: var(--surface); color: var(--text);
+    box-shadow: 4px 4px 14px rgb(0 0 0 / .15); cursor: pointer; display: grid; place-items: center; padding: 0; }
+  .pmd-tab svg { transition: transform .2s; }
+  .pmd.expanded .pmd-tab { left: auto; right: 16px; border: 1px solid var(--line); border-radius: 10px 0 0 10px; }
+  .pmd.expanded .pmd-tab svg { transform: rotate(180deg); }
+  .pmd.expanded .pmd-panel { right: 52px; width: auto; align-items: center; padding-bottom: 210px; }
+  .pmd.expanded .pmd-panel > * { width: min(100%, 820px); }
+  .pmd.expanded .pmd-map { inset: auto 24px 24px auto; width: 260px; height: 180px; z-index: 1100; border-radius: 12px;
+    border: 2px solid var(--surface); box-shadow: 0 8px 24px rgb(0 0 0 / .3); overflow: hidden; cursor: pointer; }
+  .pmd.expanded .pmd-map .leaflet-control-container { display: none; }
+  .pmd-full { border: 1px solid var(--line); background: var(--bg); color: var(--text); border-radius: 999px;
+    font-size: 13px; height: 32px; padding: 0 12px; cursor: pointer; }
   .pmd-modepick h2 { margin: 4px 0; font-size: 22px; }
   .pmd-modes { display: grid; gap: 10px; margin-top: 10px; }
   .pmd-modes button { text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line);
@@ -191,7 +211,9 @@ const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
   .pmd-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
   .pmd-hills { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; }
   .pmd-prof { width: 100%; height: 70px; display: block; color: var(--blue); }
-  .pmd-prof text { font: 11px var(--font-body); fill: var(--muted); }
+  .pmd-profw { position: relative; padding-left: 40px; }
+  .pmd-profw span { position: absolute; left: 0; font-size: 11px; color: var(--muted); }
+  .pmd-profw .hi { top: 4px; } .pmd-profw .lo { bottom: 0; }
   .pmd-warn { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
   .pmd-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .pmd-actions button { height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line);
@@ -263,7 +285,11 @@ const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
     .pmd-panel { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 75%; border-radius: 18px 18px 0 0;
       padding: 6px 16px calc(14px + env(safe-area-inset-bottom)); transition: transform .25s ease; }
     .pmd-panel.collapsed { transform: translateY(calc(100% - 196px)); }
-    .pmd-grip { display: block; align-self: center; width: 100%; height: 22px; border: 0; background: none; cursor: pointer; padding: 0; }
+    .pmd-griprow { display: flex; align-items: center; gap: 8px; }
+    .pmd-tab { display: none; }
+    .pmd.expanded .pmd-panel { top: 0; right: 0; max-height: none; border-radius: 0; transform: none; padding-bottom: 140px; }
+    .pmd.expanded .pmd-map { width: 140px; height: 110px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); }
+    .pmd-grip { display: block; flex: 1; height: 32px; border: 0; background: none; cursor: pointer; padding: 0 0 0 60px; }
     .pmd-grip span { display: block; margin: 0 auto; width: 44px; height: 5px; border-radius: 3px; background: var(--line); }
     .pmd-suggest { left: 0; right: 0; }
     .pmd-places { gap: 6px; }
@@ -392,6 +418,7 @@ const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
 
   // Tap the map: one popup with two big buttons (instead of long-press menus that are hard on phones).
   map.on("click", (e) => {
+    if (root.classList.contains("expanded")) { setExpanded(false); return; }
     if (!mode) return;
     const ll = [e.latlng.lat, e.latlng.lng];
     const div = document.createElement("div"); div.className = "pmd-pop";
@@ -524,7 +551,24 @@ const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
   function prefsChanged() { store.set(`ride-prefs-${mode}`, prefs); syncControls(); plan(); }
 
   // mobile bottom sheet
-  $("pmd-grip").onclick = () => panel.classList.toggle("collapsed");
+  $("pmd-grip").onclick = () => { if (!root.classList.contains("expanded")) panel.classList.toggle("collapsed"); };
+
+  // expand: the panel takes the page, the map shrinks to a live thumbnail in the corner (tap it to come back)
+  function setExpanded(on, refit = true) {
+    root.classList.toggle("expanded", on);
+    panel.classList.remove("collapsed");
+    $("pmd-tab").setAttribute("aria-expanded", String(on));
+    $("pmd-tab").setAttribute("aria-label", on ? "Show the full map" : "Expand the planner to full width");
+    $("pmd-tab").title = on ? "Show the map" : "Expand";
+    $("pmd-full").setAttribute("aria-expanded", String(on));
+    $("pmd-full").textContent = on ? "Show map" : "Full screen";
+    setTimeout(() => {
+      map.invalidateSize();
+      if (last && refit) map.fitBounds(L.latLngBounds(last.pts), { padding: on ? [10, 10] : [40, 40], paddingTopLeft: !on && window.innerWidth > 760 ? [420, 30] : [10, 10] });
+    }, 260);
+  }
+  $("pmd-tab").onclick = () => setExpanded(!root.classList.contains("expanded"));
+  $("pmd-full").onclick = () => setExpanded(!root.classList.contains("expanded"));
 
   // ---- router worker ----
   const worker = new Worker(new URL("../../pmd/router.worker.js", import.meta.url), { type: "module" });
@@ -564,12 +608,13 @@ const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
     let lo = Infinity, hi = -Infinity;
     for (const [, z] of prof) { lo = Math.min(lo, z); hi = Math.max(hi, z); }
     const span = Math.max(hi - lo, 20), base = lo - 2;
-    const X = (d) => (d / total * (W - 30) + 28).toFixed(1), Y = (z) => (H - 4 - (z - base) / span * (H - 14)).toFixed(1);
+    const X = (d) => (d / total * W).toFixed(1), Y = (z) => (H - 4 - (z - base) / span * (H - 14)).toFixed(1);
     const line = prof.map(([d, z]) => `${X(d)},${Y(z)}`).join(" ");
-    return `<svg class="pmd-prof" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Elevation profile, ${Math.round(lo)} to ${Math.round(hi)} metres">
-      <polygon points="28,${H - 4} ${line} ${W - 2},${H - 4}" fill="currentColor" opacity=".15"/>
-      <polyline points="${line}" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
-      <text x="0" y="12">${Math.round(hi)} m</text><text x="0" y="${H - 4}">${Math.round(lo)} m</text></svg>`;
+    // labels are HTML, not SVG text, so the stretched (preserveAspectRatio="none") drawing doesn't distort them
+    return `<div class="pmd-profw"><span class="hi">${Math.round(hi)} m</span><span class="lo">${Math.round(lo)} m</span>
+      <svg class="pmd-prof" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Elevation profile, ${Math.round(lo)} to ${Math.round(hi)} metres">
+      <polygon points="0,${H - 4} ${line} ${W},${H - 4}" fill="currentColor" opacity=".15"/>
+      <polyline points="${line}" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg></div>`;
   }
   function draw(r, refit) {
     routeLayer.clearLayers();
@@ -658,6 +703,7 @@ const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
   const streetView = (t) => `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${t.at[0].toFixed(6)},${t.at[1].toFixed(6)}&heading=${Math.round(t.heading)}`;
   let stepMarker = null;
   function focusStep(t) {
+    if (root.classList.contains("expanded")) { setExpanded(false, false); setTimeout(() => focusStep(t), 280); return; }
     const ll = t.at || last.pts[last.pts.length - 1];
     map.setView(ll, 18);
     stepMarker?.remove();
