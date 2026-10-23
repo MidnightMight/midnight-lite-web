@@ -1,7 +1,7 @@
 {
   "tools": [
     {
-      "title": "Ride route planner (SE Qld)",
+      "title": "Bike & e-scooter route planner (SE Qld)",
       "status": "live",
       "tags": [
         "Bike / e-scooter / EUC",
@@ -9,7 +9,7 @@
       ],
       "text": "Bike, e-bike, e-scooter and EUC routes around Brisbane, Ipswich, Logan, the Gold Coast and Moreton Bay: bikeways first, legal roads only, hills counted.",
       "url": "/tools/route-planner/",
-      "image": ""
+      "image": "/img/tools/route-planner.jpg"
     },
     {
       "title": "EUC World data visualiser",

@@ -5,12 +5,43 @@ import { site } from "../../lib/site";
 const RULES_CHECKED = "24 October 2026";
 // Graph file is built by tools/pmd-graph/build.py from OpenStreetMap; the date in the name is the OSM extract date.
 const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
+
+// Search: the FAQ below is shown on the page and mirrored in FAQPage structured data (keep the two in step).
+const FAQ = [
+  ["Where can I ride an e-scooter in Queensland?",
+    "On footpaths, shared paths and bike paths unless a sign says no PMDs (12 km/h on footpaths, 25 km/h elsewhere), and on roads and on-road bike lanes where the speed limit is 60 km/h or less. On faster roads only physically separated bike lanes. From 31 August 2026 riders need to be 16 and hold at least a learner licence. The planner follows these rules for e-scooters, e-skateboards and EUCs."],
+  ["Can I take my bike or e-scooter on the CityCat?",
+    "Yes. Translink lets bikes, e-scooters and other personal mobility devices on CityCats and ferries for free when there is room, at the crew's discretion. The planner can use the CityCat, CityHopper and cross-river ferries when they save time, or avoid them."],
+  ["Does it cover the Gold Coast, Logan, Ipswich and Moreton Bay?",
+    "Yes. It covers Brisbane, Ipswich, Logan, the Gold Coast, Moreton Bay and Redland: roughly from Caboolture and Bribie Island down to Coolangatta, and from Ipswich to the bay."],
+  ["How does it avoid busy roads?",
+    "Every bikeway, path and road from OpenStreetMap is scored by type, surface, speed limit and hills. The default \"bikeways first\" setting sticks to bikeways, shared paths and bike lanes and only uses roads when there is no sensible alternative. You can also choose quiet streets only, no roads at all, or any legal road."],
+  ["How are hills worked out?",
+    "From Geoscience Australia's LiDAR terrain model (bare earth, about 10 m detail), so trees and buildings don't add fake climbs. Each route shows the total climb and descent, the steepest grade, an elevation profile and, for e-scooters and e-bikes, a rough battery estimate."],
+  ["Is it free, and does it track me?",
+    "It is free, with no account. The route is worked out in your browser and nothing is sent to Midnight Lite. Place searches, and the street names looked up for points you tap, go to Photon (komoot); the map tiles come from OpenStreetMap."],
+];
+const jsonld = [
+  { "@context": "https://schema.org", "@type": "WebApplication", name: "Bike and e-scooter route planner (SE Queensland)",
+    url: "https://www.midnight-lite.com/tools/route-planner/", applicationCategory: "TravelApplication", operatingSystem: "Any (web browser)",
+    browserRequirements: "Requires JavaScript", isAccessibleForFree: true, offers: { "@type": "Offer", price: "0", priceCurrency: "AUD" },
+    description: "Free route planner for bikes, e-bikes, e-scooters, e-skateboards and EUCs around Brisbane, the Gold Coast, Logan, Ipswich and Moreton Bay. Bikeways first, legal roads only under Queensland's rules, hills from LiDAR, CityCat ferries, turn-by-turn directions and printable PDF.",
+    featureList: ["Bikeways-first routing", "Queensland e-scooter (PMD) and bicycle road rules", "Hills and elevation profile", "CityCat and ferries", "Turn-by-turn directions with Street View links", "Print or save as PDF", "GPX export"],
+    areaServed: ["Brisbane", "Gold Coast", "Logan", "Ipswich", "Moreton Bay", "Redland"].map((name) => ({ "@type": "City", name })),
+    author: { "@type": "Organization", name: site.name, url: "https://www.midnight-lite.com/" } },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Tools", item: "https://www.midnight-lite.com/tools/" },
+    { "@type": "ListItem", position: 2, name: "Bike and e-scooter route planner", item: "https://www.midnight-lite.com/tools/route-planner/" }] },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
+];
 ---
-<Base title="Bike and PMD route planner (SE Queensland)" page="tools" description="Plan bike, e-bike, e-scooter or EUC routes around Brisbane, Ipswich, Logan, the Gold Coast and Moreton Bay: bikeways first, legal roads only, with hills. Runs in your browser.">
+<Base title="Brisbane bike & e-scooter route planner" page="tools" image="/img/tools/route-planner.jpg"
+  description="Bike, e-bike, e-scooter and EUC route planner for Brisbane, Gold Coast, Logan, Ipswich and Moreton Bay. Free. Bikeways first, legal roads only, hills, CityCat.">
+  <Fragment slot="head">{jsonld.map((j) => <script type="application/ld+json" set:html={JSON.stringify(j)} />)}</Fragment>
   <section class="pmd-head">
     <div class="wrap">
-      <p class="eyebrow"><a href="/tools/">Tools</a></p>
-      <h1>Ride route planner</h1>
+      <p class="eyebrow"><a href="/tools/">Tools</a> · Brisbane and SE Queensland</p>
+      <h1>Bike and e-scooter route planner</h1>
       <p>Bikes, e-bikes, e-scooters, e-skateboards and EUCs around Brisbane, Ipswich, Logan, the Gold Coast and Moreton
         Bay. Bikeways first, only roads your ride is allowed on, and the hills counted. Runs in your browser.</p>
     </div>
@@ -145,11 +176,36 @@ const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
       </div>
     </div>
   </div>
+
+  <section class="pmd-about">
+    <div class="wrap prose">
+      <h2>How the planner picks a route</h2>
+      <p>Pick how you ride (bicycle, e-bike, or e-scooter, EUC or e-skateboard), then set a start and finish by searching,
+        tapping the map or using your location. The planner looks at every bikeway, shared path, footpath and road in
+        Brisbane, Ipswich, Logan, the Gold Coast and Moreton Bay and finds the best route your ride is allowed to use under
+        Queensland's road rules, with bikeways and bike lanes first.</p>
+      <ul>
+        <li><strong>Legal for your ride:</strong> e-scooters, e-skateboards and EUCs stay off roads over 60 km/h; bikes can use
+          any road unless it's signed "no bicycles"; one-way streets are followed (with bicycle contraflow where allowed).</li>
+        <li><strong>Hills counted:</strong> climb, descent, steepest grade and an elevation profile, plus a rough battery estimate for e-scooters and e-bikes.</li>
+        <li><strong>CityCat and ferries:</strong> used when they're quicker than riding around the river.</li>
+        <li><strong>Directions you can take with you:</strong> turn-by-turn steps with Street View links, GPX for your bike computer or phone,
+          and a large-print page you can print or save as a PDF.</li>
+      </ul>
+      <h2>Questions</h2>
+      {FAQ.map(([q, a]) => <details class="pmd-faq"><summary>{q}</summary><p>{a}</p></details>)}
+      <p class="hint">Rules checked {RULES_CHECKED}. Spotted something out of date? Email <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
+    </div>
+  </section>
 </Base>
 
 <style is:global>
   .pmd [hidden] { display: none !important; }
   .pmd-head { padding: 28px 0 12px; }
+  .pmd-about { padding: 40px 0 56px; }
+  .pmd-faq { border-bottom: 1px solid var(--line); padding: 4px 0; }
+  .pmd-faq summary { cursor: pointer; font-weight: 600; padding: 10px 0; }
+  .pmd-faq p { margin: 0 0 12px; color: var(--muted); }
   .pmd-head h1 { margin: 4px 0 6px; }
   .pmd-head p { margin: 0; color: var(--muted); max-width: 70ch; }
   .pmd { position: relative; height: calc(100dvh - 120px); min-height: 480px; border-top: 1px solid var(--line); }
