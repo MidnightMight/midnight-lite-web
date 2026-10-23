@@ -1,0 +1,761 @@
+---
+import Base from "../../layouts/Base.astro";
+import { site } from "../../lib/site";
+// When the rules below were last checked against the qld.gov.au pages (update after re-checking them).
+const RULES_CHECKED = "24 October 2026";
+// Graph file is built by tools/pmd-graph/build.py from OpenStreetMap; the date in the name is the OSM extract date.
+const GRAPH = { url: "/data/pmd/seq-20261024-v5.bin", date: "24 October 2026" };
+---
+<Base title="Bike and PMD route planner (SE Queensland)" page="tools" description="Plan bike, e-bike, e-scooter or EUC routes around Brisbane, Ipswich, Logan, the Gold Coast and Moreton Bay: bikeways first, legal roads only, with hills. Runs in your browser.">
+  <section class="pmd-head">
+    <div class="wrap">
+      <p class="eyebrow"><a href="/tools/">Tools</a></p>
+      <h1>Ride route planner</h1>
+      <p>Bikes, e-bikes, e-scooters, e-skateboards and EUCs around Brisbane, Ipswich, Logan, the Gold Coast and Moreton
+        Bay. Bikeways first, only roads your ride is allowed on, and the hills counted. Runs in your browser.</p>
+    </div>
+  </section>
+
+  <div class="pmd" id="pmd" data-graph={GRAPH.url} data-email={site.email} data-checked={RULES_CHECKED} data-osm={GRAPH.date}>
+    <div class="pmd-map" id="pmd-map" aria-label="Map. Tap to set start or finish."></div>
+
+    <div class="pmd-panel" id="pmd-panel">
+      <button class="pmd-grip" id="pmd-grip" type="button" aria-label="Show or hide the planner"><span></span></button>
+
+      <!-- step 1: how are you riding? (shown until a mode is picked) -->
+      <div class="pmd-modepick" id="pmd-modepick" hidden>
+        <h2>How are you riding?</h2>
+        <p class="hint">This sets which roads and paths are legal for you and how hills count.</p>
+        <div class="pmd-modes">
+          <button type="button" data-mode="bike"><b>Bicycle</b><span>Any road unless "no bicycles"; footpaths OK</span></button>
+          <button type="button" data-mode="ebike"><b>E-bike</b><span>Like a bicycle; 12 km/h on footpaths</span></button>
+          <button type="button" data-mode="pmd"><b>E-scooter, EUC or e-skate</b><span>Paths, and roads 60 km/h or less</span></button>
+        </div>
+      </div>
+
+      <div class="pmd-main" id="pmd-main" hidden>
+        <div class="seg seg-mode" data-pref="mode" role="group" aria-label="Ride type">
+          <button type="button" data-v="bike">Bicycle</button>
+          <button type="button" data-v="ebike">E-bike</button>
+          <button type="button" data-v="pmd">E-scooter / EUC</button>
+        </div>
+
+        <div class="pmd-places">
+          <div class="pmd-place">
+            <span class="pmd-dot a" aria-hidden="true">A</span>
+            <input id="pmd-from" type="search" placeholder="Start: search or tap the map" autocomplete="off" enterkeyhint="search" aria-label="Start">
+            <button class="pmd-icon" id="pmd-locate" type="button" title="Use my location" aria-label="Use my location as the start">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+          </div>
+          <div class="pmd-place">
+            <span class="pmd-dot b" aria-hidden="true">B</span>
+            <input id="pmd-to" type="search" placeholder="Finish: search or tap the map" autocomplete="off" enterkeyhint="search" aria-label="Finish">
+            <button class="pmd-icon" id="pmd-swap" type="button" title="Swap start and finish" aria-label="Swap start and finish">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <ul class="pmd-suggest" id="pmd-suggest" role="listbox" hidden></ul>
+        </div>
+
+        <div class="pmd-status" id="pmd-status" role="status">Loading map data…</div>
+        <div class="pmd-result" id="pmd-result" hidden></div>
+
+        <details class="pmd-opts" id="pmd-opts">
+          <summary>Route options</summary>
+          <fieldset>
+            <legend>Roads</legend>
+            <div class="seg" data-pref="roads">
+              <button type="button" data-v="bikeways">Bikeways first</button>
+              <button type="button" data-v="avoid">Paths, roads if needed</button>
+              <button type="button" data-v="quiet">Quiet streets OK</button>
+              <button type="button" data-v="none">No roads</button>
+              <button type="button" data-v="any">Any legal road</button>
+            </div>
+            <p class="hint" id="pmd-roads-hint"></p>
+          </fieldset>
+          <fieldset>
+            <legend>Hills</legend>
+            <div class="seg" data-pref="hills">
+              <button type="button" data-v="ignore">Don't mind</button>
+              <button type="button" data-v="some">Some</button>
+              <button type="button" data-v="avoid">Avoid</button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>CityCat and ferries</legend>
+            <div class="seg" data-pref="ferries">
+              <button type="button" data-v="use">Use if quicker</button>
+              <button type="button" data-v="avoid">Avoid</button>
+            </div>
+            <p class="hint">Times assume a typical wait to board (about 10 min on the river). Check the timetable.</p>
+          </fieldset>
+          <fieldset>
+            <legend>Footpaths <span class="hint" id="pmd-foot-hint"></span></legend>
+            <div class="seg" data-pref="footpaths">
+              <button type="button" data-v="prefer">Fine</button>
+              <button type="button" data-v="normal">Some</button>
+              <button type="button" data-v="avoid">Avoid</button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Surface</legend>
+            <div class="seg" data-pref="surface">
+              <button type="button" data-v="any">Any</button>
+              <button type="button" data-v="good">Avoid rough</button>
+              <button type="button" data-v="paved">Sealed only</button>
+            </div>
+          </fieldset>
+          <fieldset id="pmd-nobike-row">
+            <legend>Paths signed "no bicycles"</legend>
+            <div class="seg" data-pref="noBikeSigns">
+              <button type="button" data-v="avoid">Avoid</button>
+              <button type="button" data-v="never">Never</button>
+            </div>
+          </fieldset>
+          <label class="pmd-check"><input type="checkbox" id="pmd-lit"> Prefer lit paths (night)</label>
+          <label class="pmd-range">Cruising speed <output id="pmd-speed-out">20</output> km/h
+            <input type="range" id="pmd-speed" min="10" max="25" step="1" value="20"></label>
+          <label class="pmd-range" id="pmd-wh-row">Battery use on the flat <output id="pmd-wh-out">15</output> Wh/km
+            <input type="range" id="pmd-wh" min="5" max="40" step="1" value="15"></label>
+        </details>
+
+        <details class="pmd-rules" id="pmd-rules">
+          <summary>Rules used for <span id="pmd-rules-mode"></span> <span class="hint">(checked {RULES_CHECKED})</span></summary>
+          <p class="hint">How the planner treats each kind of path and road for your ride type. If a rule here is out of
+            date, please <a id="pmd-report" href="#">let me know</a> and I'll update the planner.</p>
+          <table class="pmd-rtable"><thead><tr><th>Path or road</th><th>Allowed?</th><th>What the planner does</th></tr></thead>
+            <tbody id="pmd-rules-body"></tbody></table>
+          <ul id="pmd-rules-notes"></ul>
+          <p><strong>Map data can be wrong or out of date.</strong> Paths and roads come from OpenStreetMap (extract {GRAPH.date}).
+            "No PMD" signs are rarely mapped, and council bans (some malls, esplanades, jetties) may not show. Hills come
+            from Geoscience Australia's LiDAR terrain model, or a coarser satellite one where there's no LiDAR. Signs on the
+            ground and the road rules always win: you're responsible for riding legally and safely.</p>
+        </details>
+
+        <p class="pmd-credit">Paths and map © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors.
+          Elevation © <a href="https://www.ga.gov.au/" rel="noopener">Geoscience Australia</a> (CC BY 4.0) and Copernicus DEM (© ESA).
+          Search by <a href="https://photon.komoot.io" rel="noopener">Photon</a>.</p>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style is:global>
+  .pmd [hidden] { display: none !important; }
+  .pmd-head { padding: 28px 0 12px; }
+  .pmd-head h1 { margin: 4px 0 6px; }
+  .pmd-head p { margin: 0; color: var(--muted); max-width: 70ch; }
+  .pmd { position: relative; height: calc(100dvh - 120px); min-height: 480px; border-top: 1px solid var(--line); }
+  .pmd-map { position: absolute; inset: 0; background: var(--line); }
+  .pmd-panel {
+    position: absolute; z-index: 1000; left: 16px; top: 16px; bottom: 16px; width: 380px; overflow: auto;
+    background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 8px 30px rgb(0 0 0 / .18); padding: 14px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .pmd-main { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .pmd-grip { display: none; }
+  .pmd-modepick h2 { margin: 4px 0; font-size: 22px; }
+  .pmd-modes { display: grid; gap: 10px; margin-top: 10px; }
+  .pmd-modes button { text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); cursor: pointer; display: grid; gap: 4px; }
+  .pmd-modes button b { font: 700 17px var(--font-body); }
+  .pmd-modes button span { font-size: 13px; color: var(--muted); }
+  .pmd-modes button:hover, .pmd-modes button:focus-visible { border-color: var(--blue); }
+  .pmd-places { position: relative; display: grid; gap: 8px; }
+  .pmd-place { display: flex; align-items: center; gap: 8px; }
+  .pmd-place input {
+    flex: 1; min-width: 0; height: 46px; font-size: 16px; /* 16px stops iOS zooming in */
+    padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--text);
+  }
+  .pmd-dot { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    font: 700 13px/1 var(--font-body); color: #fff; }
+  .pmd-dot.a { background: #1f9d55; } .pmd-dot.b { background: #d64545; }
+  .pmd-icon { flex: none; width: 46px; height: 46px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); display: grid; place-items: center; cursor: pointer; }
+  .pmd-icon:active { transform: scale(.96); }
+  .pmd-suggest { position: absolute; z-index: 5; left: 36px; right: 54px; top: 100%; margin: 4px 0 0; padding: 4px;
+    list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: 0 8px 24px rgb(0 0 0 / .2); max-height: 50vh; overflow: auto; }
+  .pmd-suggest li { padding: 12px 10px; border-radius: 8px; cursor: pointer; font-size: 15px; }
+  .pmd-suggest li small { display: block; color: var(--muted); font-size: 13px; }
+  .pmd-suggest li[aria-selected="true"], .pmd-suggest li:hover { background: var(--amber-soft); }
+  .pmd-status { font-size: 14px; color: var(--muted); }
+  .pmd-status.err { color: #d64545; }
+  .pmd-result { display: grid; gap: 8px; }
+  .pmd-sum { display: flex; gap: 6px 16px; align-items: baseline; flex-wrap: wrap; }
+  .pmd-sum b { font: 700 26px/1 var(--font-head); }
+  .pmd-sum .hint { margin: 0; }
+  .pmd-bar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: var(--line); }
+  .pmd-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: var(--muted); margin: 0; padding: 0; list-style: none; }
+  .pmd-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .pmd-hills { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; }
+  .pmd-prof { width: 100%; height: 70px; display: block; color: var(--blue); }
+  .pmd-prof text { font: 11px var(--font-body); fill: var(--muted); }
+  .pmd-warn { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+  .pmd-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pmd-actions button { height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); font-size: 14px; cursor: pointer; }
+  .pmd-opts, .pmd-rules { border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; }
+  .pmd-opts summary, .pmd-rules summary { cursor: pointer; padding: 12px 0; font-weight: 600; }
+  .pmd-opts fieldset { border: 0; margin: 0 0 12px; padding: 0; }
+  .pmd-opts legend { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button { min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); font-size: 14px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .seg-mode { flex-wrap: nowrap; }
+  .seg-mode button { flex: 1; padding: 0 6px; font-size: 13px; }
+  .hint { font-size: 12px; color: var(--muted); font-weight: 400; margin: 6px 0 0; }
+  .pmd-check, .pmd-range { display: flex; align-items: center; gap: 8px; font-size: 14px; margin: 0 0 12px; flex-wrap: wrap; }
+  .pmd-check input { width: 22px; height: 22px; }
+  .pmd-range input { width: 100%; }
+  .pmd-rules ul { padding-left: 18px; margin: 0 0 8px; font-size: 13px; }
+  .pmd-rtable { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+  .pmd-rtable th, .pmd-rtable td { text-align: left; vertical-align: top; padding: 6px 4px; border-top: 1px solid var(--line); }
+  .pmd-rtable th { font-weight: 600; color: var(--muted); border-top: 0; }
+  .pmd-rtable td:nth-child(2) { white-space: nowrap; font-weight: 600; }
+  .pmd-rtable .no { color: #d64545; } .pmd-rtable .yes { color: #1f9d55; } .pmd-rtable .maybe { color: #b07800; }
+  .pmd-ruleline { font-size: 12px; color: var(--muted); margin: 0; }
+  .pmd-dirs { border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; }
+  .pmd-dirs summary { cursor: pointer; padding: 10px 0; font-weight: 600; }
+  .pmd-dirs ol { margin: 0 0 10px; padding-left: 22px; font-size: 14px; }
+  .pmd-dirs li { padding: 6px 0; border-top: 1px solid var(--line); }
+  .pmd-dirs li button { all: unset; cursor: pointer; display: block; }
+  .pmd-dirs li button:hover, .pmd-dirs li button:focus-visible { text-decoration: underline; }
+  .pmd-dirs .meta { display: flex; gap: 12px; font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .pmd-dirs .det { font-size: 12px; line-height: 1.45; color: var(--muted); margin-top: 3px; }
+  .pmd-dirs ol:not(.verbose) .det { display: none; }
+  .pmd-dirs .pmd-check { font-size: 13px; margin: 0 0 8px; }
+  #pmd-print { display: none; }
+  @media print {
+    body > :not(#pmd-print) { display: none !important; }
+    #pmd-print { display: block !important; color: #000; background: #fff; font: 13pt/1.4 var(--font-body); }
+    @page { margin: 12mm; }
+  }
+  #pmd-print h1 { font: 700 22pt/1.2 var(--font-head); margin: 0 0 4px; }
+  #pmd-print .pm { color: #333; margin: 0 0 10px; }
+  #pmd-print .stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14pt; margin: 6px 0 10px; }
+  #pmd-print table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  #pmd-print td { border-top: 1px solid #bbb; padding: 6px 6px; vertical-align: top; }
+  #pmd-print tr { break-inside: avoid; }
+  #pmd-print td.n { font-weight: 700; width: 2em; }
+  #pmd-print td.d { white-space: nowrap; color: #333; width: 6em; }
+  #pmd-print .warn, #pmd-print .fine { font-size: 10pt; color: #333; }
+  #pmd-print .pmd-prof { height: 90px; color: #004AAD; }
+  .pmd-snip { position: relative; overflow: hidden; background: #eee; border: 1px solid #999; border-radius: 6px; }
+  .pmd-snip img { position: absolute; width: 256px; height: 256px; max-width: none; }
+  .pmd-snip svg { position: absolute; inset: 0; }
+  .pmd-rules p { font-size: 13px; color: var(--muted); }
+  .pmd-credit { font-size: 12px; color: var(--muted); margin: auto 0 0; }
+  .pmd-pop { display: grid; gap: 8px; min-width: 170px; }
+  .pmd-pop button { height: 44px; border-radius: 10px; border: 0; color: #fff; font: 600 15px var(--font-body); cursor: pointer; }
+  .pmd-pop .a { background: #1f9d55; } .pmd-pop .b { background: #d64545; }
+  .pmd-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid #fff;
+    box-shadow: 0 2px 6px rgb(0 0 0 / .35); display: grid; place-items: center; }
+  .pmd-pin span { transform: rotate(45deg); color: #fff; font: 700 13px var(--font-body); }
+
+  @media (max-width: 760px) {
+    .pmd-head { padding: 16px 0 8px; }
+    .pmd-head p { display: none; }
+    .pmd-head h1 { font-size: 28px; }
+    .pmd { height: calc(100dvh - 96px); }
+    .pmd-panel { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 75%; border-radius: 18px 18px 0 0;
+      padding: 6px 16px calc(14px + env(safe-area-inset-bottom)); transition: transform .25s ease; }
+    .pmd-panel.collapsed { transform: translateY(calc(100% - 196px)); }
+    .pmd-grip { display: block; align-self: center; width: 100%; height: 22px; border: 0; background: none; cursor: pointer; padding: 0; }
+    .pmd-grip span { display: block; margin: 0 auto; width: 44px; height: 5px; border-radius: 3px; background: var(--line); }
+    .pmd-suggest { left: 0; right: 0; }
+    .pmd-places { gap: 6px; }
+  }
+</style>
+
+<script>
+  import L from "leaflet";
+  import "leaflet/dist/leaflet.css";
+
+  const BBOX = { s: -28.27, w: 152.35, n: -26.80, e: 153.56 };
+  // category id -> label, colour (same ids as build.py / router.worker.js)
+  const CATS = [
+    ["Bikeway", "#1f9d55"], ["Shared path", "#14a3a3"], ["Footpath", "#e0a100"], ["Quiet street", "#3d7fe0"],
+    ["Main road ≤ 60", "#d64545"], ["Road bike lane", "#7b61ff"], ["Crossing", "#8a8f98"], ["Track / unsealed", "#8b5a2b"],
+    ["Footpath beside a fast road", "#e0a100"], ["Road over 60 km/h", "#8f1d1d"], ["Bike lane on a fast road", "#b04ad6"],
+    ["Ferry (CityCat etc.)", "#0b3d91"],
+  ];
+  const MODES = {
+    bike: { label: "bicycles", speed: 22, max: 35, roads: "bikeways", foot: "(give way to pedestrians)" },
+    ebike: { label: "e-bikes", speed: 25, max: 35, roads: "bikeways", wh: 8, foot: "(12 km/h limit)" },
+    pmd: { label: "e-scooters, EUCs and e-skateboards", speed: 20, max: 25, roads: "avoid", wh: 15, foot: "(12 km/h limit)" },
+  };
+  // What the planner does with each kind of path/road, per ride type: [type, allowed, treatment].
+  // allowed: "yes" | "no" | "maybe". Keep in line with build.py (legality) and router.worker.js (costs).
+  const RULES = {
+    pmd: [
+      ["Bikeways and separated paths", "yes", "Preferred. 25 km/h; on separated paths, the bicycle side only."],
+      ["Shared paths", "yes", "Preferred. 25 km/h, 12 km/h when passing pedestrians."],
+      ["Footpaths", "yes", "Used, a little less than shared paths (12 km/h). Your Footpaths option changes how much."],
+      ["Road crossings", "yes", "12 km/h on the crossing; a small time penalty for stopping first."],
+      ["Quiet streets (60 km/h or less)", "yes", "Avoided unless needed; set by your Roads option."],
+      ["Main roads (60 km/h or less)", "yes", "Strongly avoided unless you pick \"Any legal road\"."],
+      ["On-road bike lanes (60 km/h or less)", "yes", "Preferred over other roads. Never against traffic."],
+      ["Roads over 60 km/h, incl. painted bike lanes", "no", "Never used."],
+      ["Bike lanes physically separated from fast roads", "yes", "Used like a bikeway."],
+      ["Footpath beside a fast road (not mapped separately)", "yes", "Used as a footpath (12 km/h)."],
+      ["Motorways", "no", "Never used."],
+      ["One-way roads", "maybe", "Legal direction only. \"Except bicycles\" exemptions don't cover PMDs."],
+      ["Paths signed \"no bicycles\"", "maybe", "Not a PMD rule, but avoided (or never used, if you choose)."],
+      ["Roads signed \"no bicycles\"", "no", "Never used (to be safe)."],
+      ["Areas signed \"no PMDs\" (malls, esplanades, jetties)", "no", "Avoided only where the map records it, which is rare. Check signs."],
+      ["Unsealed tracks", "yes", "Avoided or excluded by your Surface option."],
+      ["Paths signed \"dismount\" (ferry gangways, campus courts)", "maybe", "Walked: timed at 5 km/h and used only when it's worth it."],
+      ["CityCat, CityHopper, cross-river ferries, Moggill ferry, Gold Coast Hopo", "yes", "Used when quicker, unless you pick Avoid. Assumes a wait to board (about 10 min on the river, 5 at Moggill, 15 for Hopo) and 18 km/h on the water. Bikes and e-scooters go free if there's room (crew's call). Island and tourist ferries aren't included."],
+    ],
+    bike: [
+      ["Bikeways and separated paths", "yes", "Preferred. On separated paths, the bicycle side only."],
+      ["Shared paths", "yes", "Preferred. Keep left and give way to pedestrians."],
+      ["Footpaths", "yes", "Allowed unless signed. Used less than bikeways; give way to pedestrians."],
+      ["Road crossings", "yes", "Stop first at zebra crossings; small time penalty."],
+      ["On-road bike lanes", "yes", "Preferred over other roads. Never against traffic."],
+      ["Quiet streets", "yes", "Used when bikeways don't go there; set by your Roads option."],
+      ["Main roads (60 km/h or less)", "yes", "Avoided unless needed, or freely with \"Any legal road\"."],
+      ["Roads over 60 km/h", "yes", "Last resort only, unless you pick \"Any legal road\". A painted bike lane or shoulder makes them less bad."],
+      ["Motorways", "maybe", "Only where the map says bicycles are allowed."],
+      ["One-way roads", "maybe", "Legal direction, plus the other way where bicycles are exempted (contraflow)."],
+      ["Paths or roads signed \"no bicycles\"", "no", "Never used."],
+      ["Unsealed tracks", "yes", "Avoided or excluded by your Surface option."],
+      ["Paths signed \"dismount\" (ferry gangways, campus courts)", "maybe", "Walked: timed at 5 km/h and used only when it's worth it."],
+      ["CityCat, CityHopper, cross-river ferries, Moggill ferry, Gold Coast Hopo", "yes", "Used when quicker, unless you pick Avoid. Assumes a wait to board (about 10 min on the river, 5 at Moggill, 15 for Hopo) and 18 km/h on the water. Bikes and e-scooters go free if there's room (crew's call). Island and tourist ferries aren't included."],
+    ],
+  };
+  RULES.ebike = RULES.bike.map((r) => r[0] === "Footpaths" ? [r[0], r[1], "Allowed unless signed. 12 km/h, used less than bikeways."]
+    : r[0] === "Shared paths" ? [r[0], r[1], "Preferred. 12 km/h when passing pedestrians."] : r);
+  const NOTES = {
+    common: [
+      "Speed limits missing from the map are guessed: local streets 50 km/h, tertiary roads 60 km/h, bigger roads over 60 km/h. Routes say when they use a guessed road.",
+      "Hills cost extra by ride type (most for bicycles, least for e-bikes); \"Avoid\" also doubles the cost of grades over 8 %.",
+    ],
+    pmd: [["qld.gov.au: rules for personal mobility devices", "https://www.qld.gov.au/transport/safety/rules/wheeled-devices/personal-mobility-devices", "page updated 26 Aug 2026"],
+      ["StreetSmarts: new e-mobility laws from 1 July 2026", "https://tmr.qld.gov.au/e-bikes-e-scooters/", ""],
+      ["Translink: bikes and e-scooters on CityCats and ferries", "https://translink.com.au/travel-with-us/cycling-and-walking", ""]],
+    bike: [["qld.gov.au: bicycle road rules and safety", "https://www.qld.gov.au/transport/safety/rules/wheeled-devices/bicycle", "page updated 1 Jul 2026"],
+      ["Translink: bikes on CityCats and ferries", "https://translink.com.au/travel-with-us/cycling-and-walking", ""]],
+    ebike: [["qld.gov.au: bicycle road rules and safety", "https://www.qld.gov.au/transport/safety/rules/wheeled-devices/bicycle", "page updated 1 Jul 2026"],
+      ["StreetSmarts: 12 km/h footpath limit for e-bikes from 1 July 2026", "https://tmr.qld.gov.au/e-bikes-e-scooters/", ""],
+      ["Translink: bikes on CityCats and ferries", "https://translink.com.au/travel-with-us/cycling-and-walking", ""]],
+  };
+  const BASE = { roads: "avoid", footpaths: "normal", surface: "good", noBikeSigns: "avoid", hills: "some", ferries: "use", lit: false };
+  const ROADS_HINT = { pmd: "Roads over 60 km/h are never used.", bike: "\"Any legal road\" includes fast roads; the others keep you off them.", ebike: "\"Any legal road\" includes fast roads; the others keep you off them." };
+
+  const $ = (id) => document.getElementById(id);
+  const root = $("pmd"), panel = $("pmd-panel"), status = $("pmd-status"), result = $("pmd-result");
+  const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+                  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+
+  // ---- state: mode, points and prefs, mirrored in the URL so a route can be shared ----
+  const qs = new URLSearchParams(location.search);
+  const parsePt = (s) => { const p = (s || "").split(",").map(Number); return p.length === 2 && p.every(isFinite) ? p : null; };
+  const defaults = (mode) => ({ ...BASE, mode, roads: MODES[mode].roads, speed: MODES[mode].speed, wh: MODES[mode].wh || 0 });
+  const urlMode = MODES[qs.get("mode")] ? qs.get("mode") : null;
+  let mode = urlMode || store.get("ride-mode");
+  let prefs = null;
+  function loadPrefs(m) {
+    const p = { ...defaults(m), ...(store.get(`ride-prefs-${m}`) || {}), mode: m };
+    for (const k of Object.keys(BASE).concat("speed", "wh")) if (qs.has(k) && m === urlMode)
+      p[k] = k === "speed" || k === "wh" ? +qs.get(k) : k === "lit" ? qs.get(k) === "1" : qs.get(k);
+    return p;
+  }
+  const pts = { a: parsePt(qs.get("a")), b: parsePt(qs.get("b")) };
+
+  // ---- map ----
+  const map = L.map("pmd-map", { zoomControl: false }).setView([-27.47, 153.02], 11);
+  L.control.zoom({ position: "topright" }).addTo(map);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19,
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
+  L.rectangle([[BBOX.s, BBOX.w], [BBOX.n, BBOX.e]], { color: "#888", weight: 1, fill: false, dashArray: "4 6", interactive: false }).addTo(map);
+  const routeLayer = L.layerGroup().addTo(map);
+  const pin = (letter, colour) => L.divIcon({ className: "", iconSize: [30, 30], iconAnchor: [15, 30],
+    html: `<div class="pmd-pin" style="background:${colour}"><span>${letter}</span></div>` });
+  const markers = {};
+  const input = (w) => $(w === "a" ? "pmd-from" : "pmd-to");
+  function placeMarker(w) {
+    if (!pts[w]) { markers[w]?.remove(); delete markers[w]; return; }
+    if (markers[w]) { markers[w].setLatLng(pts[w]); return; }
+    markers[w] = L.marker(pts[w], { draggable: true, icon: pin(w.toUpperCase(), w === "a" ? "#1f9d55" : "#d64545") }).addTo(map);
+    markers[w].on("dragend", (e) => { const p = e.target.getLatLng(); setPoint(w, [p.lat, p.lng]); });
+  }
+  function setPoint(w, ll, label) {
+    pts[w] = ll; placeMarker(w);
+    input(w).value = label || `${ll[0].toFixed(5)}, ${ll[1].toFixed(5)}`;
+    if (label === undefined) reverseName(w, ll);
+    plan();
+  }
+
+  // Tap the map: one popup with two big buttons (instead of long-press menus that are hard on phones).
+  map.on("click", (e) => {
+    if (!mode) return;
+    const ll = [e.latlng.lat, e.latlng.lng];
+    const div = document.createElement("div"); div.className = "pmd-pop";
+    div.innerHTML = '<button class="a" type="button">Start here</button><button class="b" type="button">Finish here</button>';
+    const pop = L.popup({ closeButton: false, offset: [0, -4] }).setLatLng(e.latlng).setContent(div).openOn(map);
+    div.querySelector(".a").onclick = () => { map.closePopup(pop); setPoint("a", ll); };
+    div.querySelector(".b").onclick = () => { map.closePopup(pop); setPoint("b", ll); };
+  });
+
+  // ---- search (Photon, limited to the planner area) ----
+  const sug = $("pmd-suggest");
+  let sugFor = null, sugTimer = 0, sugAbort = null, sugSel = -1;
+  const fmt = (f) => { const p = f.properties; const name = p.name || [p.housenumber, p.street].filter(Boolean).join(" ");
+    const sub = [p.name && p.street ? [p.housenumber, p.street].filter(Boolean).join(" ") : "", p.district || p.locality, p.city].filter(Boolean).join(", ");
+    return { name: name || sub, sub }; };
+  function showSuggest(which, feats) {
+    sugFor = which; sugSel = -1;
+    sug.innerHTML = "";
+    for (const f of feats) {
+      const { name, sub } = fmt(f), li = document.createElement("li");
+      li.role = "option"; li.textContent = name;
+      if (sub && sub !== name) { const s = document.createElement("small"); s.textContent = sub; li.append(s); }
+      li.onpointerdown = (ev) => { ev.preventDefault(); pick(f); };
+      sug.append(li);
+    }
+    sug.style.top = which === "a" ? "46px" : "100%";
+    sug.hidden = !feats.length;
+  }
+  function pick(f) {
+    const [lon, lat] = f.geometry.coordinates;
+    sug.hidden = true;
+    setPoint(sugFor, [lat, lon], fmt(f).name);
+    document.activeElement?.blur();
+    map.setView([lat, lon], Math.max(map.getZoom(), 14));
+  }
+  for (const which of ["a", "b"]) {
+    const inp = input(which);
+    inp.addEventListener("input", () => {
+      clearTimeout(sugTimer);
+      const q = inp.value.trim();
+      if (q.length < 3) { sug.hidden = true; return; }
+      sugTimer = setTimeout(async () => {
+        sugAbort?.abort(); sugAbort = new AbortController();
+        try {
+          const c = map.getCenter();
+          const u = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=en&lat=${c.lat}&lon=${c.lng}&bbox=${BBOX.w},${BBOX.s},${BBOX.e},${BBOX.n}`;
+          const r = await fetch(u, { signal: sugAbort.signal });
+          showSuggest(which, (await r.json()).features || []);
+        } catch (err) { if (err.name !== "AbortError") showSuggest(which, []); }
+      }, 300);
+    });
+    inp.addEventListener("keydown", (e) => {
+      const items = [...sug.children];
+      if (sug.hidden || !items.length) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault(); sugSel = (sugSel + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length;
+        items.forEach((li, i) => li.setAttribute("aria-selected", String(i === sugSel)));
+      } else if (e.key === "Enter") { e.preventDefault(); items[Math.max(sugSel, 0)].dispatchEvent(new Event("pointerdown")); }
+      else if (e.key === "Escape") sug.hidden = true;
+    });
+    inp.addEventListener("focus", () => { panel.classList.remove("collapsed"); });
+    inp.addEventListener("blur", () => setTimeout(() => { sug.hidden = true; }, 150));
+  }
+  async function reverseName(which, ll) {
+    try {
+      const r = await fetch(`https://photon.komoot.io/reverse?lat=${ll[0]}&lon=${ll[1]}&lang=en`);
+      const f = (await r.json()).features?.[0];
+      if (f && pts[which] === ll) input(which).value = fmt(f).name || fmt(f).sub;
+    } catch {}
+  }
+
+  $("pmd-locate").onclick = () => {
+    if (!navigator.geolocation) { say("This browser can't share your location.", true); return; }
+    say("Finding you…");
+    navigator.geolocation.getCurrentPosition(
+      (p) => { const ll = [p.coords.latitude, p.coords.longitude]; setPoint("a", ll, "My location"); map.setView(ll, 15); },
+      () => say("Couldn't get your location. Check the browser's location permission.", true),
+      { enableHighAccuracy: true, timeout: 10000 });
+  };
+  $("pmd-swap").onclick = () => {
+    const la = input("a").value, lb = input("b").value;
+    [pts.a, pts.b] = [pts.b, pts.a];
+    for (const [w, label] of [["a", lb], ["b", la]]) { placeMarker(w); input(w).value = pts[w] ? label : ""; }
+    plan();
+  };
+
+  // ---- mode + options ----
+  function syncControls() {
+    for (const seg of document.querySelectorAll(".seg")) {
+      const k = seg.dataset.pref;
+      seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === prefs[k])));
+    }
+    const M = MODES[mode];
+    $("pmd-lit").checked = prefs.lit;
+    $("pmd-speed").max = M.max; $("pmd-speed").value = prefs.speed; $("pmd-speed-out").value = prefs.speed;
+    $("pmd-wh-row").hidden = !M.wh; $("pmd-wh").value = prefs.wh; $("pmd-wh-out").value = prefs.wh;
+    $("pmd-nobike-row").hidden = mode !== "pmd";
+    $("pmd-roads-hint").textContent = ROADS_HINT[mode];
+    $("pmd-foot-hint").textContent = M.foot;
+    $("pmd-rules-mode").textContent = M.label;
+    $("pmd-rules-body").innerHTML = RULES[mode].map(([t, ok, how]) =>
+      `<tr><td>${t}</td><td class="${ok}">${{ yes: "Yes", no: "No", maybe: "Partly" }[ok]}</td><td>${how}</td></tr>`).join("");
+    $("pmd-rules-notes").innerHTML = NOTES.common.map((n) => `<li>${n}</li>`).join("") +
+      NOTES[mode].map(([l, u, d]) => `<li>Source: <a href="${u}" rel="noopener">${l}</a>${d ? ` (${d})` : ""}.</li>`).join("");
+    $("pmd-report").href = reportLink();
+  }
+  function reportLink() {
+    const body = `Hi, a rule in the ride route planner looks out of date.\n\nRide type: ${MODES[mode].label}\nRules checked: ${root.dataset.checked}\nMap data: ${root.dataset.osm}\nPage: ${location.href}\n\nWhat's changed (and a link to the new rule, if you have one):\n`;
+    return `mailto:${root.dataset.email}?subject=${encodeURIComponent("Route planner: rule update")}&body=${encodeURIComponent(body)}`;
+  }
+  function setMode(m) {
+    mode = m; store.set("ride-mode", m);
+    prefs = loadPrefs(m);
+    $("pmd-modepick").hidden = true; $("pmd-main").hidden = false;
+    syncControls(); plan();
+  }
+  document.querySelectorAll(".pmd-modes button").forEach((b) => { b.onclick = () => setMode(b.dataset.mode); });
+  for (const seg of document.querySelectorAll(".seg")) {
+    seg.addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      if (seg.dataset.pref === "mode") { if (b.dataset.v !== mode) setMode(b.dataset.v); return; }
+      prefs[seg.dataset.pref] = b.dataset.v; prefsChanged();
+    });
+  }
+  $("pmd-lit").onchange = (e) => { prefs.lit = e.target.checked; prefsChanged(); };
+  $("pmd-speed").oninput = (e) => { prefs.speed = +e.target.value; $("pmd-speed-out").value = prefs.speed; };
+  $("pmd-speed").onchange = () => prefsChanged();
+  $("pmd-wh").oninput = (e) => { prefs.wh = +e.target.value; $("pmd-wh-out").value = prefs.wh; if (last) draw(last, false); };
+  $("pmd-wh").onchange = () => store.set(`ride-prefs-${mode}`, prefs);
+  function prefsChanged() { store.set(`ride-prefs-${mode}`, prefs); syncControls(); plan(); }
+
+  // mobile bottom sheet
+  $("pmd-grip").onclick = () => panel.classList.toggle("collapsed");
+
+  // ---- router worker ----
+  const worker = new Worker(new URL("../../pmd/router.worker.js", import.meta.url), { type: "module" });
+  let ready = false, reqId = 0, last = null;
+  const say = (msg, err = false) => { status.textContent = msg; status.classList.toggle("err", err); status.hidden = !msg; };
+  worker.onmessage = ({ data }) => {
+    if (data.type === "progress") { if (data.total) say(`Loading map data… ${Math.round(100 * data.got / data.total)} %`); }
+    else if (data.type === "ready") { ready = true; say(pts.a && pts.b ? "" : "Search for places or tap the map to set the start (A) and finish (B)."); plan(); }
+    else if (data.type === "error") say(data.message, true);
+    else if (data.type === "route" && data.id === reqId) {
+      if (data.error) { routeLayer.clearLayers(); result.hidden = true; last = null; say(data.error, true); return; }
+      say(""); last = data; draw(data, true);
+    }
+  };
+  worker.postMessage({ type: "load", url: root.dataset.graph });
+
+  const inArea = (ll) => ll[0] >= BBOX.s && ll[0] <= BBOX.n && ll[1] >= BBOX.w && ll[1] <= BBOX.e;
+  function plan() {
+    const u = new URL(location.href);
+    for (const w of ["a", "b"]) pts[w] ? u.searchParams.set(w, pts[w].map((v) => v.toFixed(5)).join(",")) : u.searchParams.delete(w);
+    if (mode) {
+      u.searchParams.set("mode", mode);
+      const d = defaults(mode);
+      for (const k of Object.keys(BASE).concat("speed", "wh")) prefs[k] !== d[k] ? u.searchParams.set(k, k === "lit" ? (prefs[k] ? "1" : "0") : prefs[k]) : u.searchParams.delete(k);
+    }
+    history.replaceState(null, "", u);
+    if (!mode || !pts.a || !pts.b || !ready) return;
+    if (!inArea(pts.a) || !inArea(pts.b)) { say("Start and finish need to be inside the dashed box (Brisbane, Ipswich, Logan, Gold Coast, Moreton Bay).", true); return; }
+    say("Planning…");
+    worker.postMessage({ type: "route", id: ++reqId, a: pts.a, b: pts.b, prefs: { ...prefs } });
+  }
+
+  const km = (m) => m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m / 10) * 10} m`;
+  const mins = (s) => s >= 3600 ? `${Math.floor(s / 3600)} h ${Math.round(s % 3600 / 60)} min` : `${Math.max(1, Math.round(s / 60))} min`;
+  function profileSvg(prof) {
+    const W = 340, H = 70, total = prof[prof.length - 1][0] || 1;
+    let lo = Infinity, hi = -Infinity;
+    for (const [, z] of prof) { lo = Math.min(lo, z); hi = Math.max(hi, z); }
+    const span = Math.max(hi - lo, 20), base = lo - 2;
+    const X = (d) => (d / total * (W - 30) + 28).toFixed(1), Y = (z) => (H - 4 - (z - base) / span * (H - 14)).toFixed(1);
+    const line = prof.map(([d, z]) => `${X(d)},${Y(z)}`).join(" ");
+    return `<svg class="pmd-prof" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Elevation profile, ${Math.round(lo)} to ${Math.round(hi)} metres">
+      <polygon points="28,${H - 4} ${line} ${W - 2},${H - 4}" fill="currentColor" opacity=".15"/>
+      <polyline points="${line}" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+      <text x="0" y="12">${Math.round(hi)} m</text><text x="0" y="${H - 4}">${Math.round(lo)} m</text></svg>`;
+  }
+  function draw(r, refit) {
+    routeLayer.clearLayers();
+    const halo = L.polyline(r.pts, { color: "#fff", weight: 9, opacity: .9, interactive: false }).addTo(routeLayer);
+    for (const run of r.runs) L.polyline(run.pts, { color: CATS[run.cat][1], weight: 5, opacity: .95, interactive: false,
+      dashArray: run.cat === 2 || run.cat === 8 ? "1 8" : run.cat === 11 ? "10 8" : null, lineCap: "round" }).addTo(routeLayer);
+    // dotted footpath runs need a solid base so they read as one line
+    for (const run of r.runs) if (run.cat === 2 || run.cat === 8) L.polyline(run.pts, { color: CATS[2][1], weight: 3, opacity: .6, interactive: false }).addTo(routeLayer);
+    for (const w of ["a", "b"]) markers[w]?.setZIndexOffset(1000);
+    // only move the map when the route isn't already fully in view (so toggling options doesn't jump around)
+    const mobile = window.innerWidth <= 760;
+    if (refit && !map.getBounds().contains(halo.getBounds()))
+      map.fitBounds(halo.getBounds(), { paddingTopLeft: mobile ? [30, 30] : [420, 30], paddingBottomRight: mobile ? [30, 210] : [60, 30] });
+
+    const s = r.stats, order = Object.entries(s.byCat).sort((x, y) => y[1] - x[1]);
+    const roads = [3, 4, 5, 9, 10].reduce((t, c) => t + (s.byCat[c] || 0), 0);
+    const bikeways = (s.byCat[0] || 0) + (s.byCat[1] || 0) + (s.byCat[5] || 0) + (s.byCat[10] || 0);
+    const warn = [];
+    if (s.unknownSpeed > 50) warn.push(`${km(s.unknownSpeed)} on roads with no speed limit in the map data (guessed from the road type). Check the signs.`);
+    if ((s.byCat[9] || 0) > 0) warn.push(`${km(s.byCat[9])} on roads over 60 km/h with no bike lane.`);
+    if (s.noBike > 20) warn.push(`${km(s.noBike)} on paths mapped as "no bicycles". PMDs may be allowed, but look for signs.`);
+    if (s.contra > 20) warn.push(`${km(s.contra)} against one-way traffic where bicycles are exempt.`);
+    if (s.walk > 10) warn.push(`Walk your ${mode === "pmd" ? "device" : "bike"} for ${km(s.walk)} (signed "dismount", e.g. ferry gangways).`);
+    if (s.ferries) warn.push(`${s.ferries} ferry trip${s.ferries > 1 ? "s" : ""} (${km(s.byCat[11])}), with about ${Math.round(s.ferryWait / 60)} min of waiting assumed. Check the timetable; bikes and e-scooters board if there's room.`);
+    if (s.unpaved > 50) warn.push(`${km(s.unpaved)} unsealed.`);
+    if (s.crossings) warn.push(`${s.crossings} path crossing${s.crossings > 1 ? "s" : ""} of roads${mode === "bike" ? "" : ": 12 km/h on crossings"}.`);
+    const wh = MODES[mode].wh ? Math.round(prefs.wh * s.metres / 1000 + s.climb * (mode === "pmd" ? 0.39 : 0.2)) : 0;
+    result.innerHTML = `
+      <div class="pmd-sum"><b>${km(s.metres)}</b><span>about <strong>${mins(s.seconds)}</strong> at up to ${prefs.speed} km/h</span>
+        <span class="hint">${Math.round(100 * bikeways / s.metres)} % bikeways and bike lanes, ${Math.round(100 * roads / s.metres)} % on roads</span></div>
+      <div class="pmd-bar">${order.map(([c, m]) => `<span style="width:${100 * m / s.metres}%;background:${CATS[c][1]}" title="${CATS[c][0]}"></span>`).join("")}</div>
+      <ul class="pmd-legend">${order.map(([c, m]) => `<li><i style="background:${CATS[c][1]}"></i>${CATS[c][0]} ${km(m)}</li>`).join("")}</ul>
+      <div class="pmd-hills"><span>▲ ${Math.round(s.climb)} m</span><span>▼ ${Math.round(s.descent)} m</span>
+        <span>steepest ${Math.round(100 * s.steepest)} %</span>${wh ? `<span>≈ ${wh} Wh battery</span>` : ""}</div>
+      ${profileSvg(r.profile)}
+      ${wh ? `<p class="hint" style="margin:0">Battery estimate: ${prefs.wh} Wh/km on the flat plus the climbing for ~100 kg${mode === "ebike" ? " (with you pedalling)" : ""}. Rough; wind, stops and cold batteries add more.</p>` : ""}
+      ${warn.length ? `<ul class="pmd-warn">${warn.map((w) => `<li>${w}</li>`).join("")}</ul>` : ""}
+      <p class="pmd-ruleline">Planned with Queensland rules checked ${root.dataset.checked}. <a href="#pmd-rules" id="pmd-see-rules">See the rules used</a> · <a href="${reportLink()}">Report an out-of-date rule</a></p>
+      <details class="pmd-dirs"><summary>Turn-by-turn (${r.steps.length - 1} steps)</summary>
+        <label class="pmd-check"><input type="checkbox" id="pmd-verbose" ${verbose ? "checked" : ""}> More detail for each step</label>
+        <ol class="${verbose ? "verbose" : ""}">${r.steps.map((t, i) => `<li>
+        <button type="button" data-step="${i}">${esc(t.text)}</button>
+        ${t.d ? `<div class="det">${esc(detail(t))}</div>` : ""}
+        <div class="meta">${t.metres ? `<span>${km(t.metres)}</span>` : ""}<span>at ${km(t.dist)}</span>
+        ${t.at && t.cat !== 11 ? `<a href="${streetView(t)}" target="_blank" rel="noopener">Street View</a>` : ""}</div></li>`).join("")}</ol></details>
+      <div class="pmd-actions"><button type="button" id="pmd-print-btn">Print / save PDF</button><button type="button" id="pmd-gpx">Download GPX</button><button type="button" id="pmd-share">Copy link</button></div>`;
+    result.hidden = false;
+    $("pmd-gpx").onclick = gpx;
+    $("pmd-print-btn").onclick = printRoute;
+    $("pmd-verbose").onchange = (e) => {
+      verbose = e.target.checked; store.set("ride-verbose", verbose);
+      result.querySelector(".pmd-dirs ol").classList.toggle("verbose", verbose);
+    };
+    result.querySelectorAll("[data-step]").forEach((b) => { b.onclick = () => focusStep(r.steps[+b.dataset.step]); });
+    $("pmd-see-rules").onclick = (e) => { e.preventDefault(); $("pmd-rules").open = true; panel.classList.remove("collapsed");
+      panel.scrollTo({ top: $("pmd-rules").offsetTop - 8, behavior: "smooth" }); };
+    $("pmd-share").onclick = async () => {
+      try { await navigator.clipboard.writeText(location.href); $("pmd-share").textContent = "Link copied"; }
+      catch { prompt("Copy this link", location.href); }
+    };
+  }
+
+  const esc = (t) => String(t).replace(/[<&>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+  let verbose = !!store.get("ride-verbose");
+  const COMPASS = ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"];
+  // the small-print line under a step in "more detail" mode
+  function detail(t) {
+    const d = t.d, parts = [];
+    const cats = Object.entries(d.cats).filter(([, m]) => m >= 5).sort((a, b) => b[1] - a[1]);
+    if (cats.length) parts.push(cats.map(([c, m]) => `${CATS[c][0]} ${km(m)}`).join(", "));
+    if (t.cat !== 11) parts.push(`heading ${COMPASS[Math.round(t.heading / 45) % 8]}`);
+    parts.push(d.sec < 45 ? "under a minute" : `about ${mins(d.sec)}`);
+    if (d.up >= 2 || d.dn >= 2) parts.push(`▲ ${Math.round(d.up)} m ▼ ${Math.round(d.dn)} m${d.steep >= 0.03 ? `, steepest ${Math.round(100 * d.steep)} %` : ""}`);
+    if (mode !== "bike" && [2, 6, 8].some((c) => d.cats[c] >= 5)) parts.push("12 km/h limit on the footpath and crossings");
+    else if (mode === "pmd") parts.push("25 km/h max");
+    if (t.crossings) parts.push(`crosses ${t.crossings} road${t.crossings > 1 ? "s" : ""}`);
+    if (d.wait) parts.push(`about ${Math.round(d.wait / 60)} min wait to board; check the timetable`);
+    if (d.walk >= 5) parts.push(`walk your ${mode === "pmd" ? "device" : "bike"} ${km(d.walk)} (dismount sign)`);
+    if (d.unpaved >= 20) parts.push(`unsealed ${km(d.unpaved)}`);
+    if (d.lit >= 0.8 * t.metres && t.metres >= 50) parts.push("lit at night");
+    if (d.contra >= 5) parts.push("against one-way traffic (bicycles exempt)");
+    if (d.guess >= 50) parts.push("speed limit not in the map data: check the signs");
+    if (d.nobike >= 5) parts.push("mapped as \"no bicycles\": look for signs");
+    return parts.join(" · ");
+  }
+  const streetView = (t) => `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${t.at[0].toFixed(6)},${t.at[1].toFixed(6)}&heading=${Math.round(t.heading)}`;
+  let stepMarker = null;
+  function focusStep(t) {
+    const ll = t.at || last.pts[last.pts.length - 1];
+    map.setView(ll, 18);
+    stepMarker?.remove();
+    stepMarker = L.circleMarker(ll, { radius: 10, color: "#004AAD", weight: 3, fill: false }).addTo(map);
+    if (window.innerWidth <= 760) panel.classList.add("collapsed");
+  }
+
+  // ---- printable sheet: map snippets are plain OSM tile <img>s with an SVG overlay, so they print without canvas/CORS ----
+  const TILE = "https://tile.openstreetmap.org";
+  function project(ll, z) {
+    const s = 256 * 2 ** z, sin = Math.sin(ll[0] * Math.PI / 180);
+    return [(ll[1] + 180) / 360 * s, (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * s];
+  }
+  function snippet(center, z, w, h, layers) {
+    const [cx, cy] = project(center, z), x0 = cx - w / 2, y0 = cy - h / 2;
+    let tiles = "";
+    for (let tx = Math.floor(x0 / 256); tx <= Math.floor((x0 + w) / 256); tx++)
+      for (let ty = Math.floor(y0 / 256); ty <= Math.floor((y0 + h) / 256); ty++)
+        tiles += `<img alt="" src="${TILE}/${z}/${tx}/${ty}.png" style="left:${tx * 256 - x0}px;top:${ty * 256 - y0}px">`;
+    const pt = (ll) => { const [x, y] = project(ll, z); return `${(x - x0).toFixed(1)},${(y - y0).toFixed(1)}`; };
+    const svg = layers.map((l) => l.circle
+      ? `<circle cx="${pt(l.circle).split(",")[0]}" cy="${pt(l.circle).split(",")[1]}" r="${l.r || 7}" fill="${l.fill || "#fff"}" stroke="${l.color}" stroke-width="3"/>`
+      : `<polyline points="${l.pts.map(pt).join(" ")}" fill="none" stroke="${l.color}" stroke-width="${l.width}" stroke-linecap="round" stroke-linejoin="round" ${l.arrow ? 'marker-end="url(#pmdArrow)"' : ""} opacity="${l.opacity || 1}"/>`).join("");
+    return `<div class="pmd-snip" style="width:${w}px;height:${h}px">${tiles}<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <defs><marker id="pmdArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#004AAD"/></marker></defs>${svg}</svg></div>`;
+  }
+  const mDist = (a, b) => Math.hypot((a[0] - b[0]) * 111320, (a[1] - b[1]) * 111320 * Math.cos(a[0] * Math.PI / 180));
+  function around(pts, idx, back, fwd) { // route points within back/forward metres of pts[idx]
+    let i = idx, d = 0; while (i > 0 && d < back) { d += mDist(pts[i], pts[i - 1]); i--; }
+    let j = idx; d = 0; while (j < pts.length - 1 && d < fwd) { d += mDist(pts[j], pts[j + 1]); j++; }
+    return [pts.slice(i, idx + 1), pts.slice(idx, j + 1)];
+  }
+  function fitZoom(pts, w, h) {
+    for (let z = 17; z > 8; z--) {
+      let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+      for (const p of pts) { const [x, y] = project(p, z); x1 = Math.min(x1, x); x2 = Math.max(x2, x); y1 = Math.min(y1, y); y2 = Math.max(y2, y); }
+      if (x2 - x1 < w - 40 && y2 - y1 < h - 40) return [z, [(y1 + y2) / 2, (x1 + x2) / 2]];
+    }
+    return [9, null];
+  }
+  function unproject([y, x], z) {
+    const s = 256 * 2 ** z, n = Math.PI - 2 * Math.PI * y / s;
+    return [180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))), x / s * 360 - 180];
+  }
+  async function printRoute() {
+    if (!last) return;
+    const r = last, s = r.stats, P = r.pts;
+    const [z, c] = fitZoom(P, 680, 420);
+    const overview = snippet(unproject(c, z), z, 680, 420, [
+      { pts: P, color: "#fff", width: 8 }, { pts: P, color: "#004AAD", width: 4 },
+      { circle: P[0], color: "#1f9d55", fill: "#1f9d55", r: 8 }, { circle: P[P.length - 1], color: "#d64545", fill: "#d64545", r: 8 }]);
+    const rows = r.steps.map((t, i) => {
+      const turn = t.at && (i === 0 || Math.abs(t.angle) >= 25 || t.cat === 11 || t.cat === 6);
+      let pic = "";
+      if (turn && t.idx >= 0) {
+        const [inn, out] = around(P, t.idx, 35, 45); // ~60 m each side fits a 220 px snippet at z18
+        pic = snippet(t.at, 18, 220, 150, [{ pts: inn, color: "#7aa7e8", width: 6 }, { pts: out, color: "#004AAD", width: 6, arrow: true }, { circle: t.at, color: "#004AAD", r: 6 }]);
+      }
+      return `<tr><td class="n">${i + 1}</td><td>${esc(t.text)}${t.metres ? `<div class="fine">then ${km(t.metres)}</div>` : ""}
+        ${verbose && t.d ? `<div class="fine">${esc(detail(t))}</div>` : ""}
+        ${t.at && t.cat !== 11 ? `<div class="fine"><a href="${streetView(t)}">Street View</a></div>` : ""}</td><td class="d">${km(t.dist)}</td><td>${pic}</td></tr>`;
+    }).join("");
+    let el = $("pmd-print");
+    if (!el) { el = document.createElement("div"); el.id = "pmd-print"; document.body.append(el); }
+    const warns = [...result.querySelectorAll(".pmd-warn li")].map((li) => `<li>${esc(li.textContent)}</li>`).join("");
+    el.innerHTML = `<h1>${esc(input("a").value)} to ${esc(input("b").value)}</h1>
+      <p class="pm">${esc(MODES[mode].label[0].toUpperCase() + MODES[mode].label.slice(1))} · printed ${new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })} · midnight-lite.com ride route planner</p>
+      <div class="stats"><b>${km(s.metres)}</b><span>about ${mins(s.seconds)} at up to ${prefs.speed} km/h</span><span>▲ ${Math.round(s.climb)} m ▼ ${Math.round(s.descent)} m</span><span>steepest ${Math.round(100 * s.steepest)} %</span></div>
+      ${overview}${profileSvg(r.profile)}
+      ${warns ? `<ul class="warn">${warns}</ul>` : ""}
+      <table>${rows}</table>
+      <p class="fine">Planned with Queensland rules checked ${root.dataset.checked}; map data (OpenStreetMap) ${root.dataset.osm}. Map data can be wrong:
+        signs on the ground and the road rules always win. Report an out-of-date rule to ${esc(root.dataset.email)}.
+        Map © OpenStreetMap contributors. Route link: ${esc(location.href)}</p>`;
+    say("Preparing the printable page…");
+    await Promise.all([...el.querySelectorAll("img")].map((img) => img.complete ? 0
+      : new Promise((ok) => { img.onload = img.onerror = ok; setTimeout(ok, 8000); })));
+    say("");
+    window.print();
+  }
+
+  function gpx() {
+    if (!last) return;
+    const name = `${input("a").value} to ${input("b").value}`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="midnight-lite.com ride route planner" xmlns="http://www.topografix.com/GPX/1/1">
+<metadata><name>${esc(name)}</name><copyright author="OpenStreetMap contributors"><license>https://opendatacommons.org/licenses/odbl/</license></copyright></metadata>
+<trk><name>${esc(name)}</name><trkseg>
+${last.pts.map(([a, b]) => `<trkpt lat="${a.toFixed(6)}" lon="${b.toFixed(6)}"/>`).join("\n")}
+</trkseg></trk></gpx>`;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([xml], { type: "application/gpx+xml" }));
+    a.download = "ride-route.gpx"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // start: ask how they ride unless we know; restore points from a shared link
+  if (mode) setMode(mode); else { $("pmd-modepick").hidden = false; say(""); }
+  for (const w of ["a", "b"]) if (pts[w]) { placeMarker(w); input(w).value = `${pts[w][0].toFixed(5)}, ${pts[w][1].toFixed(5)}`; reverseName(w, pts[w]); }
+  if (pts.a && pts.b) map.fitBounds([pts.a, pts.b], { padding: [40, 40] });
+  if (window.innerWidth <= 760 && pts.a && pts.b && mode) panel.classList.add("collapsed");
+</script>
