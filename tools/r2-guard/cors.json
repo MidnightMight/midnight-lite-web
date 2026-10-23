@@ -1,0 +1,13 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": ["https://www.midnight-lite.com", "https://midnight-lite.com", "http://192.168.1.196:8091"],
+        "methods": ["GET", "HEAD"],
+        "headers": ["range", "if-match"]
+      },
+      "exposeHeaders": ["ETag", "Content-Range", "Content-Length"],
+      "maxAgeSeconds": 86400
+    }
+  ]
+}

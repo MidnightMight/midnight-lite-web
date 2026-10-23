@@ -501,8 +501,25 @@ const jsonld = [
   // ---- map ----
   const map = L.map("pmd-map", { zoomControl: false }).setView([-27.47, 153.02], 11);
   L.control.zoom({ position: "topright" }).addTo(map);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19,
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
+  // Base map: a self-hosted PMTiles file (vector, drawn in the browser, with a dark style) when the build sets
+  // PUBLIC_TILES_URL, otherwise OpenStreetMap's public raster tiles. If the file doesn't answer (e.g. the R2 usage
+  // guard has paused it for the month, see tools/r2-guard), fall back to OSM. Print close-ups always use OSM tiles.
+  const TILES_URL = import.meta.env.PUBLIC_TILES_URL;
+  const OSM_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+  const osmTiles = () => L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: OSM_ATTR }).addTo(map);
+  async function ownTiles() {
+    try {
+      const res = await fetch(TILES_URL, { headers: { Range: "bytes=0-126" }, signal: AbortSignal.timeout(4000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { leafletLayer } = await import("protomaps-leaflet");
+      const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+      leafletLayer({ url: TILES_URL, flavor: dark ? "dark" : "light", lang: "en", maxZoom: 19,
+        attribution: `${OSM_ATTR} · <a href="https://protomaps.com">Protomaps</a>` }).addTo(map);
+    } catch {
+      osmTiles();
+    }
+  }
+  if (TILES_URL) ownTiles(); else osmTiles();
   L.rectangle([[BBOX.s, BBOX.w], [BBOX.n, BBOX.e]], { color: "#888", weight: 1, fill: false, dashArray: "4 6", interactive: false }).addTo(map);
   const routeLayer = L.layerGroup().addTo(map);
   const pin = (letter, colour) => L.divIcon({ className: "", iconSize: [30, 30], iconAnchor: [15, 30],
