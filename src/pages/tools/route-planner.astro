@@ -1088,7 +1088,7 @@ const jsonld = [
     const legs = ridePlan(r).legs;
     const cards = await Promise.all(legs.map(async (g, i) => `<figure class="qr">
       ${await QRCode.toString(g.url, { type: "svg", errorCorrectionLevel: "M", margin: 2 })}
-      <figcaption><b>Part ${i + 1}</b> · ${g.km.toFixed(1)} km<br>${stepsLabel(g)[0].toUpperCase() + stepsLabel(g).slice(1)}${g.end.spot ? `<br>ends at rest stop ${stars(g.end.spot.mask)} (${km(g.endD)})` : ""}${g.ferryAfter ? "<br>then the CityCat / ferry" : ""}</figcaption></figure>`));
+      <figcaption><b>Part ${i + 1}</b> · ${g.km.toFixed(1)} km<br>${stepsLabel(g)[0].toUpperCase() + stepsLabel(g).slice(1)}${g.end.spot ? `<br>ends at a rest stop at ${km(g.endD)} ${stars(g.end.spot.mask)}` : ""}${g.ferryAfter ? "<br>then the CityCat / ferry" : ""}</figcaption></figure>`));
     return `<section class="qrs"><h2>Open in Google Maps</h2>
       <p class="fine">Scan with your phone camera to open bike directions for each part${gmLive ? " from where you are (scan each one when you reach its start)" : ""}.
         Google picks its own way between pins; if it disagrees with this sheet, follow this sheet.</p>
