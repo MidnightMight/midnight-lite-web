@@ -13,7 +13,7 @@ Config: ~/.config/r2-guard.env (chmod 600), lines KEY=value:
   R2_BUCKET, R2_DOMAIN   e.g. midnight-lite-tiles, tiles.midnight-lite.com
   NOTIFY_URL             optional: plain-text POST (e.g. an ntfy topic URL)
   WARN, PAUSE            optional fractions (0.7, 0.9)
-Usage: r2_guard.py [--status] [--dry-run]
+Usage: r2_guard.py [--status] [--dry-run] [--off | --on]   (--off/--on switch the tiles domain by hand)
 """
 import datetime as dt, json, os, sys, urllib.request
 
@@ -78,6 +78,11 @@ def main():
         print(f"not configured ({CONF} missing)")
         return
     c = env()
+    if "--off" in sys.argv or "--on" in sys.argv:
+        on = "--on" in sys.argv
+        set_domain(c, on)
+        print(f"{c['R2_DOMAIN']} turned {'on' if on else 'off'}")
+        return
     warn, pause = float(c.get("WARN", 0.7)), float(c.get("PAUSE", 0.9))
     now = dt.datetime.now(dt.timezone.utc)
     month = now.strftime("%Y-%m")
