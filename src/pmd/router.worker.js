@@ -100,14 +100,14 @@ function costTable(prefs) {
   mult[CAT.FOOTPATH] *= foot; mult[CAT.SIDEWALK] *= foot;
   if (prefs.surface === "paved") mult[CAT.TRACK] = I; else if (prefs.surface === "good") mult[CAT.TRACK] *= 2;
   if (prefs.mode === "pmd") mult[CAT.ROAD_FAST] = mult[CAT.ROAD_FAST_LANE] = I; // PMDs: never on roads over 60 km/h
-  // ...but a main road with no speed limit anywhere in the data might be 60: PMDs may use it as a last resort (with a
-  // warning to check the signs), unless main roads are off in the Roads option
-  const big = (rows[prefs.roads] || rows.avoid)[CAT.ROAD_BIG], lastResort = big === I ? I : Math.max(big * 2, 8);
+  // ...but a main road with no speed limit anywhere in the data is probably signed 60 or less: PMDs may use it like a
+  // main road (the guessed-limit penalty still applies) with a warning to check the signs, unless main roads are off
+  const unmapped = (rows[prefs.roads] || rows.avoid)[CAT.ROAD_BIG];
   for (let i = 0; i < mult.length; i++) if (mult[i] < 1) mult[i] = 1;
   // hills: metres-of-flat equivalent per metre climbed, by mode and preference
   const hill = { bike: [0, 8, 25], ebike: [0, 3, 10], pmd: [0, 4, 14] }[prefs.mode] || [0, 6, 20];
   const hk = hill[{ ignore: 0, some: 1, avoid: 2 }[prefs.hills] ?? 1];
-  return { mult, hk, steep: prefs.hills === "avoid", lastResort };
+  return { mult, hk, steep: prefs.hills === "avoid", unmapped };
 }
 
 function edgeCost(G, e, rev, T, prefs) {
@@ -117,7 +117,7 @@ function edgeCost(G, e, rev, T, prefs) {
     return Math.max(G.len[e], G.len[e] / FERRY_MPS * prefs.speed / 3.6 * 1.1);
   }
   let k = T.mult[c];
-  if (k === Infinity && f & F_SPEED_UNKNOWN && (c === CAT.ROAD_FAST || c === CAT.ROAD_FAST_LANE)) k = T.lastResort;
+  if (k === Infinity && f & F_SPEED_UNKNOWN && (c === CAT.ROAD_FAST || c === CAT.ROAD_FAST_LANE)) k = T.unmapped;
   if (k === Infinity) return Infinity;
   if (rev & 2 && prefs.mode === "pmd") return Infinity; // contraflow is for bicycles only
   if (f & F_UNPAVED) { if (prefs.surface === "paved") return Infinity; k *= prefs.surface === "good" ? 3 : 1.4; }

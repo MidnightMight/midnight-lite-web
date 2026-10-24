@@ -427,7 +427,7 @@ const jsonld = [
       ["Main roads (60 km/h or less)", "yes", "Strongly avoided unless you pick \"Any legal road\"."],
       ["On-road bike lanes (60 km/h or less)", "yes", "Preferred over other roads. Never against traffic."],
       ["Roads over 60 km/h, incl. painted bike lanes", "no", "Never used."],
-      ["Main roads with no speed limit in the map", "maybe", "Last resort only, with a warning: ride them only where signed 60 km/h or less. Know the limit? Email us and we'll add it."],
+      ["Main roads with no speed limit in the map", "maybe", "Used like other main roads (a little less), with a warning: ride them only where signed 60 km/h or less. Know the limit? Email us and we'll add it."],
       ["Bike lanes physically separated from fast roads", "yes", "Used like a bikeway."],
       ["Footpath beside a fast road (not mapped separately)", "yes", "Used as a footpath (12 km/h)."],
       ["Motorways", "no", "Never used."],
@@ -461,7 +461,7 @@ const jsonld = [
     : r[0] === "Shared paths" ? [r[0], r[1], "Preferred. 12 km/h when passing pedestrians."] : r);
   const NOTES = {
     common: [
-      "Speed limits missing from the map are taken from the connected parts of the same road where those are mapped (the higher one if they differ). Otherwise they're guessed: local streets 50 km/h, tertiary roads 60 km/h, bigger roads over 60 km/h. Routes say when they use a road with a guessed limit. Main roads with no limit anywhere in the data are a last resort for PMDs, with a warning to check the signs.",
+      "Speed limits missing from the map are taken from the connected parts of the same road where those are mapped (the higher one if they differ). Otherwise they're guessed: local streets 50 km/h, tertiary roads 60 km/h, bigger roads over 60 km/h. Routes say when they use a road with a guessed limit. Main roads with no limit anywhere in the data are used like other main roads for PMDs, with a warning to check the signs.",
       "Rest stops get a star rating out of 5 from what OpenStreetMap shows within about 40 m of the route: toilets 1.5⭐, drinking water 1.25⭐, shelter 1⭐, cafe 0.75⭐, picnic table 0.5⭐, bench 0.5⭐, bike repair stand 0.25⭐ (rounded to half stars). It rates facilities, not reviews. Breaks use stops rated 1.5/5⭐ or more; Google Maps parts hand over at the best stop near where a split is needed.",
       "Hills cost extra by ride type (most for bicycles, least for e-bikes); \"Avoid\" also doubles the cost of grades over 8 %.",
     ],
