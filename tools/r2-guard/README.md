@@ -24,14 +24,17 @@ whenever the file doesn't answer, so pausing R2 never breaks the map.
 3. Dashboard → R2 → the bucket → Settings → Custom Domains → connect `tiles.midnight-lite.com`.
 4. Dashboard → midnight-lite.com → Security → WAF → Rate limiting rules: hostname equals `tiles.midnight-lite.com`,
    e.g. 600 requests per 10 seconds per IP → Block for 10 s (one rule is free; stops scrapers, not people panning).
-5. Cloudflare Pages → Settings → Variables: `PUBLIC_TILES_URL=https://tiles.midnight-lite.com/seq-20261023.pmtiles`,
+5. Dashboard → midnight-lite.com → Caching → Cache Rules: hostname equals `tiles.midnight-lite.com` → Eligible for
+   cache, edge TTL 1 month. Without it every map view is an R2 read (`cf-cache-status: DYNAMIC`); with it, most
+   are answered from Cloudflare's cache for free. Upload new tiles under a new file name so the cache never goes stale.
+6. Cloudflare Pages → Settings → Variables: `PUBLIC_TILES_URL=https://tiles.midnight-lite.com/seq-20261023.pmtiles`,
    then redeploy.
 
 ## The guard
 
 `r2_guard.py` runs hourly from cron on the NUC (installed as `~/.local/bin/r2-guard`, log in
 `~/.local/state/r2-guard.log`). It warns at 70 % of the free tier, turns the custom domain off at 90 % (the map
-switches to OSM tiles) and turns it back on at the start of the next month. `r2-guard --status` shows this
+switches to OSM tiles) and turns it back on at the start of the next month. `r2-guard --off` / `--on` switch the tiles domain by hand. `r2-guard --status` shows this
 month's usage; `--dry-run` checks without changing anything. Add `NOTIFY_URL=` to the env file for a phone
 notification (any URL that accepts a plain-text POST, such as an ntfy topic).
 
