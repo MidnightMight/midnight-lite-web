@@ -9,9 +9,17 @@ video: ''
 draft: false
 ---
 
-Soo this morning, I was planning to plan a trip from home to another location and I thought to myself. "Huh the new law came into effect." Then I tried to find map apps or route planner that will conform to the law or find me the most legal way to not get fined riding on the wrong road or path. Here's what I found, Most maps apps either send an e-scooter or EUC down a road it isn't allowed on, or have no idea what one is. Bike directions are better, but they don't know Queensland's rules either. So I built a planner that does: the [ride route planner](/tools/route-planner/). It covers Brisbane, Ipswich, Logan, the Gold Coast and Moreton Bay, and it's free. (I am just gonna leave it here but if the map api gets banned I might convert it to a paid app or do some adjustment to make it usable again.)
+I ride an EUC, and this morning I was planning a trip from home to another part of town when it hit me: “Huh, the new law’s in effect now.” So I went looking for a map app or route planner that would actually follow the rules, something that could find me the most legal route so I wouldn’t get fined for riding on the wrong road or path.
 
-Now I built this app in a morning with the help of claude running and me doing what I do, adjusting and providing framework issh. here's a preview of it below.
+Here’s what I found. Most map apps either send an e-scooter or EUC down roads it isn’t allowed on, or have no idea what one even is (as an EUC rider, I’ve been on the receiving end of that sometimes).Bike directions are better, but they don’t know Queensland’s rules either.
+
+So I built a planner that does: **Ride Route Planner**. It covers Brisbane, Ipswich, Logan, the Gold Coast and Moreton Bay, and it’s completely free.
+
+I built it in a single morning with Claude doing the heavy lifting on the code while I did what I do best: steering the direction, setting up the framework and fine-tuning the details while having my brekky.
+
+I’m planning to keep it free. If I lose access to the map API, though, I might have to turn it into a paid app or rework it to keep it running.
+
+Here’s a preview:
 
 ![The planner on a desktop: a 35 km ride from Redcliffe to the city with a break stop](/img/uploads/route-planner-desktop.webp)
 
@@ -77,13 +85,11 @@ Not everyone wants to ride with a phone. The printout uses large text and gives 
 
 ## What it can't know
 
-- Map data can be wrong or out of date. 
-- "No PMD" signs and council bans on malls and esplanades are rarely mapped, and speed limits are sometimes missing (the route says when it had to guess). 
-- Shared e-scooters also have the operator's own no-ride and slow zones, which the planner doesn't know about. 
-- Signs on the ground and the road rules always win. 
-- Weather conditions and Road conditions, Plus the construction... those are well undocumented.
-
-Next on the list: hosting the map tiles myself, so a popular day doesn't run into OpenStreetMap's usage limits.
+- Map data can be wrong or out of date.
+- “No PMD” signs and council bans on malls and esplanades are rarely mapped, and speed limits are sometimes missing. The route will tell you when it had to guess.
+- Shared e-scooters have their own operator no-ride and slow zones, which the planner doesn’t know about.
+- Weather, road conditions and construction work aren’t factored in, since they’re rarely documented in map data.
+- **Signs on the ground and the road rules always win.**
 
 ## How it was made
 
