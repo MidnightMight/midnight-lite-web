@@ -67,7 +67,8 @@ F_NOBIKE = 8        # bicycle=no on a path: illegal for bicycles, warning for PM
 F_SPEED_GUESS = 16  # road speed limit not tagged, inferred from the road class
 F_LIT = 32
 F_CONTRA = 64       # one-way, but bicycles may ride both ways
-F_DISMOUNT = 128    # bicycle=dismount (ferry gangways, campus courts): allowed on foot, pushing the bike/device
+F_DISMOUNT = 128
+F_SIGNALS = 256    # crossing controlled by traffic lights    # bicycle=dismount (ferry gangways, campus courts): allowed on foot, pushing the bike/device
 
 ROAD_LOCAL = {"living_street", "residential", "service", "unclassified", "road"}
 ROAD_MAIN = {"tertiary", "tertiary_link", "secondary", "secondary_link", "primary", "primary_link", "trunk", "trunk_link"}
@@ -82,12 +83,25 @@ YES = {"yes", "designated", "permissive"}
 CW_KEYS = ("cycleway", "cycleway:left", "cycleway:right", "cycleway:both")
 
 
-def speed(t):
-    v = t.get("maxspeed", "")
-    try:
-        return int(v.split()[0]), False
-    except (ValueError, IndexError):
-        pass
+def tagged_speed(t):
+    """Speed limit from the tags, or None. Per-direction limits count as their higher value."""
+    vals = []
+    for k in ("maxspeed", "maxspeed:forward", "maxspeed:backward"):
+        try:
+            vals.append(int(t.get(k, "").split()[0]))
+        except (ValueError, IndexError):
+            pass
+    if "maxspeed" in t and vals:
+        return vals[0]
+    return max(vals) if vals else None
+
+
+def speed(t, inferred=None):
+    sp = tagged_speed(t)
+    if sp is not None:
+        return sp, False
+    if inferred:
+        return inferred, True   # taken from the connected parts of the same road (still flagged as a guess)
     h = t.get("highway")
     if h in ROAD_LOCAL:
         return 50, True
@@ -96,7 +110,7 @@ def speed(t):
     return 80, True   # secondary/primary/trunk with no tag: assume over 60 (PMDs kept off)
 
 
-def classify(t):
+def classify(t, inferred=None):
     """Return (category, flags), or None if no mode may use this way."""
     h = t.get("highway")
     if not h and t.get("route") == "ferry":
@@ -120,6 +134,8 @@ def classify(t):
     if h == "cycleway":
         if oneway:
             flags |= F_ONEWAY
+        if t.get("cycleway") == "crossing" and signalised(t):
+            flags |= F_SIGNALS
         return (CAT["CROSSING"] if t.get("cycleway") == "crossing" else CAT["CYCLEWAY"]), flags
     if h in ("footway", "pedestrian", "path", "bridleway", "track"):
         if t.get("bicycle") == "no":
@@ -127,6 +143,8 @@ def classify(t):
         elif t.get("bicycle") == "dismount":
             flags |= F_DISMOUNT
         if t.get("footway") == "crossing" or t.get("path") == "crossing":
+            if signalised(t):
+                flags |= F_SIGNALS
             return CAT["CROSSING"], flags
         if h in ("track", "bridleway") or (flags & F_UNPAVED and h == "path"):
             return CAT["TRACK"], flags
@@ -143,7 +161,7 @@ def classify(t):
         return None
     if t.get("bicycle") in ("no", "use_sidepath"):
         return None   # signed no bicycles on a road: keep every mode off it (conservative for PMDs too)
-    sp, guess = speed(t)
+    sp, guess = speed(t, inferred)
     if guess:
         flags |= F_SPEED_GUESS
     if oneway:
@@ -163,6 +181,11 @@ def classify(t):
     return (CAT["ROAD_QUIET"] if h in ROAD_LOCAL else CAT["ROAD_BIG"]), flags
 
 
+def signalised(t):
+    """Traffic lights on this node, or a crossing way controlled by them."""
+    return t.get("highway") == "traffic_signals" or t.get("crossing") == "traffic_signals" or t.get("crossing:signals") == "yes"
+
+
 def is_bridge(t):
     return t.get("bridge") not in (None, "no") or t.get("tunnel") not in (None, "no") or t.get("man_made") == "bridge"
 
@@ -179,15 +202,59 @@ def poi_mask(t):
     return sum(m for (k, v), m in POI.items() if t.get(k) == v)
 
 
-class Ways(osmium.SimpleHandler):
+class MainRoads(osmium.SimpleHandler):
+    """First pass: main roads, so untagged parts can borrow the speed limit of the road they belong to."""
+
     def __init__(self):
         super().__init__()
+        self.roads = {}   # way id -> (name, link, speed or None, first node, last node)
+
+    def way(self, w):
+        h = w.tags.get("highway")
+        if h in ROAD_MAIN and len(w.nodes) >= 2:
+            self.roads[w.id] = (w.tags.get("name", ""), h.endswith("_link"), tagged_speed(w.tags), w.nodes[0].ref, w.nodes[-1].ref)
+
+
+def infer_speeds(src):
+    """Way id -> speed limit for untagged main roads, spread along same-named connected parts (highest neighbour
+    wins, to stay on the safe side for PMDs). Unnamed slip roads take the highest limit of the roads they join."""
+    m = MainRoads()
+    m.apply_file(src)
+    at = {}
+    for wid, (_, _, _, a, b) in m.roads.items():
+        at.setdefault(a, []).append(wid)
+        at.setdefault(b, []).append(wid)
+    known = {wid: r[2] for wid, r in m.roads.items() if r[2] is not None}
+    todo = [wid for wid in m.roads if wid not in known]
+    while True:
+        found = {}
+        for wid in todo:
+            name, link, _, a, b = m.roads[wid]
+            nb = [known[o] for n in (a, b) for o in at[n] if o in known and (m.roads[o][0] == name if name else link)]
+            if nb and (name or link):
+                found[wid] = max(nb)
+        if not found:
+            break
+        known.update(found)
+        todo = [wid for wid in todo if wid not in found]
+    out = {wid: known[wid] for wid, r in m.roads.items() if r[2] is None and wid in known}
+    print("main roads", len(m.roads), "untagged", len(out) + len(todo), "limit inferred", len(out))
+    return out
+
+
+class Ways(osmium.SimpleHandler):
+    def __init__(self, inferred):
+        super().__init__()
+        self.inferred = inferred
         self.ways = []          # (cat, flags, bridge, [node ids], wait, name)
         self.uses = {}
         self.coords = {}
         self.pois = []          # (lat, lon, mask, name)
+        self.signals = set()    # node ids with traffic lights (made into vertices so routes can stop there)
 
     def node(self, n):
+        if len(n.tags) and signalised(n.tags):
+            self.signals.add(n.id)
         m = poi_mask(n.tags) if len(n.tags) else 0
         if m and n.location.valid():
             self.pois.append((n.location.lat, n.location.lon, m, n.tags.get("name", "")))
@@ -199,7 +266,7 @@ class Ways(osmium.SimpleHandler):
             if pts:
                 self.pois.append((sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts), m, w.tags.get("name", "")))
             return
-        c = classify(w.tags)
+        c = classify(w.tags, self.inferred.get(w.id))
         if not c:
             return
         ids = [n.ref for n in w.nodes]
@@ -215,7 +282,7 @@ class Ways(osmium.SimpleHandler):
         name = t.get("name") or t.get("ref") or ("CityCat / ferry" if c[0] == CAT["FERRY"] else "")
         self.ways.append((c[0], c[1], is_bridge(t) or c[0] == CAT["FERRY"], ids, wait, name))
         for i, n in enumerate(ids):
-            self.uses[n] = self.uses.get(n, 0) + (2 if i in (0, len(ids) - 1) else 1)
+            self.uses[n] = self.uses.get(n, 0) + (2 if i in (0, len(ids) - 1) else 1) + (n in self.signals)
 
 
 class DEM:
@@ -282,7 +349,7 @@ def smooth(d, z, win=25.0):
 
 
 def main(src, demdir, out):
-    h = Ways()
+    h = Ways(infer_speeds(src))
     h.apply_file(src, locations=True, idx="flex_mem")
     print("ways", len(h.ways), "nodes", len(h.coords))
     dem = DEM(demdir)
@@ -339,8 +406,9 @@ def main(src, demdir, out):
                 start = i
     link_ferries(h, vid, vlat, vlon, edges, names)
     pois = near_paths(h, names)
-    print("vertices", len(vlat), "edges", len(edges), "geom pts", len(geom))
-    write(out, vlat, vlon, vz, edges, geom, names, pois)
+    signals = sorted(vid[n] for n in h.signals if n in vid)
+    print("vertices", len(vlat), "edges", len(edges), "geom pts", len(geom), "traffic lights", len(signals))
+    write(out, vlat, vlon, vz, edges, geom, names, pois, signals)
 
 
 def near_paths(h, names, reach_cells=1):
@@ -419,7 +487,7 @@ def varints(vals, out):
         out.append(v)
 
 
-def write(out, vlat, vlon, vz, edges, geom, names, pois):
+def write(out, vlat, vlon, vz, edges, geom, names, pois, signals):
     # spatial order: sort vertices by a 0.01 deg grid cell, then lon, so neighbours have close ids
     n = len(vlat)
     order = sorted(range(n), key=lambda i: (vlat[i] // 10000, vlon[i] // 10000, vlon[i], vlat[i]))
@@ -432,7 +500,7 @@ def write(out, vlat, vlon, vz, edges, geom, names, pois):
         pts = [(vlat[a], vlon[a])] + geom[g0:g0 + gn] + [(vlat[b], vlon[b])]
         E.append((new[a], new[b], L, cat, flags, dp(pts, 1.5), up, down, wait, nm))
     E.sort(key=lambda e: (e[0], e[1]))
-    buf = bytearray(b"PMD6")
+    buf = bytearray(b"PMD7")
     cols = [
         [lat[0]] + [lat[i] - lat[i - 1] for i in range(1, n)],
         [lon[0]] + [lon[i] - lon[i - 1] for i in range(1, n)],
@@ -467,10 +535,13 @@ def write(out, vlat, vlon, vz, edges, geom, names, pois):
     varints([pois[0][1]] + [pois[i][1] - pois[i - 1][1] for i in range(1, len(pois))], buf)
     varints([p[2] for p in pois], buf)
     varints([p[3] for p in pois], buf)
+    # traffic lights: count, then vertex ids (sorted, deltas)
+    sig = sorted(new[v] for v in signals)
+    varints([len(sig)] + [sig[0]] + [sig[i] - sig[i - 1] for i in range(1, len(sig))], buf)
     with gzip.open(out, "wb", compresslevel=9) as f:
         f.write(bytes(buf))
     json.dump({"vertices": n, "edges": len(E), "geom": len(g) // 2, "raw_bytes": len(buf),
-               "cats": {k: sum(1 for e in E if e[3] == v) for k, v in CAT.items()},
+               "cats": {k: sum(1 for e in E if e[3] == v) for k, v in CAT.items()}, "signals": len(sig),
                "climb_km_total": round(sum(e[6] for e in E) / 10000, 1)},
               open(out + ".json", "w"), indent=1)
 
