@@ -3,14 +3,14 @@ import Base from "../layouts/Base.astro";
 import about from "../data/about.json";
 import { site } from "../lib/site";
 ---
-<Base title="About" page="about" description="About Midnight Lite (@midnightlite): skills, timeline and the gear behind the videos.">
+<Base title="About" page="about" description="About Midnight Lite (@midnightlite): skills, timeline and the gear behind the builds.">
   <section class="page-hero">
     <div class="wrap split" style="grid-template-columns:1.3fr .7fr">
       <div>
         <p class="eyebrow">About</p>
         <h1>Hi, I'm Midnight Lite.</h1>
         <p>{about.intro}</p>
-        <div class="btns"><a class="btn blue" href="/projects/">See my work</a><a class="btn yt" href={site.youtube}>▶ YouTube</a><a class="btn line" href="/contact/">Get in touch</a></div>
+        <div class="btns"><a class="btn blue" href="/projects/">See my work</a>{site.videos && <a class="btn yt" href={site.youtube}>▶ YouTube</a>}<a class="btn line" href="/contact/">Get in touch</a></div>
       </div>
       <img src="/logo.svg" alt="Midnight Lite logo" width="280" height="280" style="width:min(280px,80%);justify-self:center;filter:drop-shadow(0 10px 22px rgba(0,0,0,.18))">
     </div>

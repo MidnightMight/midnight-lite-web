@@ -1,5 +1,7 @@
 import site from "../data/site.json";
 export { site };
+// Videos/YouTube are switched off for now (site.json "videos": false): no nav link, buttons, embeds or /videos/ page.
+export const canSubscribe = !!(site.buttondown || site.videos);
 
 export const TOPICS: Record<string, string> = {
   "3d-printing": "3D printing", robots: "Robots", photography: "Photography", electric: "Electric",

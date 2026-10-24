@@ -166,6 +166,7 @@ collections:
           - { label: Home headline, name: tagline, widget: string }
           - { label: Search description, name: description, widget: text }
           - { label: Contact email, name: email, widget: string }
+          - { label: Show videos & YouTube (nav, buttons, embeds), name: videos, widget: boolean, required: false, default: false }
           - { label: YouTube URL, name: youtube, widget: string }
           - { label: YouTube channel ID, name: youtubeChannelId, widget: string, hint: "Used to pull your latest videos automatically." }
           - { label: Instagram URL (leave empty to hide), name: instagram, widget: string, required: false }
