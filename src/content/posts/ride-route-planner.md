@@ -3,7 +3,7 @@ title: Building a bike and e-scooter route planner for SE Queensland
 description: How the ride route planner works, the rules it follows, and the problems along the way, from fake hills to ferry gangways and Google Maps moving the start onto the street.
 date: 2026-10-24
 topic: web
-project: ''
+project: this-website
 cover: /img/uploads/route-planner-desktop.webp
 video: ''
 draft: false
