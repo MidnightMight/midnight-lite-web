@@ -6,6 +6,8 @@ import YouTube from "../components/YouTube.astro";
 import { site } from "../lib/site";
 import { channelVideos } from "../lib/youtube";
 
+// Videos are switched off for now (site.json "videos": false): send visitors to the build log instead.
+if (!site.videos) return Astro.redirect("/blog/");
 // Videos = what's on the channel (RSS feed) merged with src/content/videos (series, chapters, links, and planned ones).
 const feed = await channelVideos();
 const entries = await getCollection("videos");

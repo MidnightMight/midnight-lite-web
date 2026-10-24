@@ -9,6 +9,6 @@ const { small = false } = Astro.props;
     <input type="email" name="email" placeholder="you@example.com" aria-label="Email" required>
     <button class={`btn blue${small ? " small" : ""}`}>Subscribe</button>
   </form>
-) : (
+) : site.videos && (
   <a class={`btn yt${small ? " small" : ""}`} href={`${site.youtube}?sub_confirmation=1`}>▶ Subscribe on YouTube</a>
 )}

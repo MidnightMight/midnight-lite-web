@@ -4,7 +4,7 @@ import Base from "../../layouts/Base.astro";
 import YouTube from "../../components/YouTube.astro";
 import AskOnYouTube from "../../components/AskOnYouTube.astro";
 import Lightbox from "../../components/Lightbox.astro";
-import { TOPICS, STATUS, fmtDate } from "../../lib/site";
+import { site, TOPICS, STATUS, fmtDate } from "../../lib/site";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects", (p) => !p.data.draft && p.data.status !== "coming-soon");
@@ -13,7 +13,7 @@ export async function getStaticPaths() {
 const { p } = Astro.props; const d = p.data;
 const { Content, headings } = await render(p);
 const posts = (await getCollection("posts", (x) => !x.data.draft && x.data.project === p.id)).map((x) => ({ date: x.data.date, title: x.data.title, href: `/blog/${x.id}/`, video: false }));
-const vids = (await getCollection("videos", (v) => v.data.project === p.id && !!v.data.youtube)).map((v) => ({ date: v.data.date ?? new Date(0), title: v.data.title, href: `https://www.youtube.com/watch?v=${v.data.youtube}`, video: true }));
+const vids = (await getCollection("videos", (v) => site.videos && v.data.project === p.id && !!v.data.youtube)).map((v) => ({ date: v.data.date ?? new Date(0), title: v.data.title, href: `https://www.youtube.com/watch?v=${v.data.youtube}`, video: true }));
 const timeline = [...posts, ...vids].sort((a, b) => +b.date - +a.date);
 const [label, cls] = STATUS[d.status];
 const firstTopic = d.topics[0];
@@ -25,7 +25,7 @@ const firstTopic = d.topics[0];
       <h1>{d.title}</h1>
       <p>{d.summary}</p>
       <div class="btns">
-        {d.video && <a class="btn yt" href={`https://www.youtube.com/watch?v=${d.video}`}>▶ Watch the video</a>}
+        {site.videos && d.video && <a class="btn yt" href={`https://www.youtube.com/watch?v=${d.video}`}>▶ Watch the video</a>}
         {d.link && <a class="btn blue" href={d.link}>Try it</a>}
         {d.files.length > 0 && <a class="btn line" href="#files">Get the files</a>}
         <a class="btn line" href="#questions">Ask a question</a>
@@ -35,11 +35,11 @@ const firstTopic = d.topics[0];
   <section style="padding-top:28px">
     <div class="wrap layout-2">
       <article>
-        {d.cover ? <p class="prose" style="max-width:none"><img src={d.cover} alt={d.title}></p> : d.video && <YouTube id={d.video} title={d.title} />}
+        {d.cover ? <p class="prose" style="max-width:none"><img src={d.cover} alt={d.title}></p> : site.videos && d.video && <YouTube id={d.video} title={d.title} />}
         <div class="prose"><Content /></div>
 
         {timeline.length > 0 && <div id="logs" style="margin-top:36px">
-          <h2>Build logs &amp; videos</h2>
+          <h2>Build logs{site.videos && <> &amp; videos</>}</h2>
           <ul class="timeline">{timeline.map((t) => <li><time>{fmtDate(t.date)}</time><br><a href={t.href}>{t.video ? "▶ " : ""}{t.title}</a></li>)}</ul>
         </div>}
 
@@ -62,7 +62,7 @@ const firstTopic = d.topics[0];
             {d.cost && <li><b>Cost</b><span>{d.cost}</span></li>}
           </ul>
         </div>
-        {headings.filter((h) => h.depth === 2).length > 1 && <div class="panel toc"><h3>On this page</h3>{headings.filter((h) => h.depth === 2).map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}{timeline.length > 0 && <a href="#logs">Build logs &amp; videos</a>}{d.files.length > 0 && <a href="#files">Files</a>}<a href="#questions">Questions</a></div>}
+        {headings.filter((h) => h.depth === 2).length > 1 && <div class="panel toc"><h3>On this page</h3>{headings.filter((h) => h.depth === 2).map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}{timeline.length > 0 && <a href="#logs">Build logs{site.videos && <> &amp; videos</>}</a>}{d.files.length > 0 && <a href="#files">Files</a>}<a href="#questions">Questions</a></div>}
       </aside>
     </div>
   </section>

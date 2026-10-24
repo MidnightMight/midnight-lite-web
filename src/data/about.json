@@ -7,7 +7,7 @@
     { "title": "Photography", "text": "Fujifilm X-S10, landscapes and travel, editing." }
   ],
   "timeline": [
-    { "when": "2026", "what": "Launching the YouTube channel and build log." },
+    { "when": "2026", "what": "Launching the build log." },
     { "when": "2026", "what": "First custom PCBs: USB-C power, ferrofluid driver." },
     { "when": "2025", "what": "Built this website from scratch; EUC World visualiser." }
   ],

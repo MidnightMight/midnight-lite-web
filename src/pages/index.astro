@@ -6,12 +6,12 @@ import ProjectCard from "../components/ProjectCard.astro";
 import PostCard from "../components/PostCard.astro";
 import Subscribe from "../components/Subscribe.astro";
 import YouTube from "../components/YouTube.astro";
-import { site } from "../lib/site";
+import { site, canSubscribe } from "../lib/site";
 import { channelVideos } from "../lib/youtube";
 
 const featured = (await getCollection("projects", (p) => !p.data.draft && p.data.featured)).sort((a, b) => a.data.order - b.data.order).slice(0, 3);
 const posts = (await getCollection("posts", (p) => !p.data.draft)).sort((a, b) => +b.data.date - +a.data.date).slice(0, 3);
-const feed = await channelVideos();
+const feed = site.videos ? await channelVideos() : [];
 const planned = (await getCollection("videos")).sort((a, b) => (a.data.episode ?? 99) - (b.data.episode ?? 99));
 const latest = feed[0]
   ? { id: feed[0].id, title: feed[0].title, text: feed[0].description.split("\n")[0], post: undefined }
@@ -29,9 +29,9 @@ const topics = [
       <div>
         <p class="eyebrow">3D printing · Robots · Photography · Electric stuff</p>
         <h1>{site.tagline}</h1>
-        <p class="lead">Circuits, robots, prints and photos: the whole messy process, from the first sketch to the thing that finally works. Watch the videos and read the build logs.</p>
+        <p class="lead">Circuits, robots, prints and photos: the whole messy process, from the first sketch to the thing that finally works. {site.videos ? "Watch the videos and read the build logs." : "Written up in the build log as I go."}</p>
         <div class="btns">
-          <a class="btn yt" href={site.youtube}>▶ Watch on YouTube</a>
+          {site.videos && <a class="btn yt" href={site.youtube}>▶ Watch on YouTube</a>}
           <a class="btn blue" href="/projects/">See the projects</a>
           <a class="btn line" href="/blog/">Read the build log</a>
         </div>
@@ -51,7 +51,7 @@ const topics = [
     </div>
   </section>
 
-  <section style="background:var(--surface);border-block:1px solid var(--line)">
+  {site.videos && <section style="background:var(--surface);border-block:1px solid var(--line)">
     <div class="wrap split">
       <YouTube id={latest?.id} title={latest?.title} caption="First video coming soon" />
       <div>
@@ -66,7 +66,7 @@ const topics = [
         </div>
       </div>
     </div>
-  </section>
+  </section>}
 
   <section>
     <div class="wrap">
@@ -86,7 +86,7 @@ const topics = [
     <div class="wrap">
       <div class="panel" style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;border-left:6px solid var(--blue)">
         <div style="flex:1;min-width:260px"><h2 style="margin-bottom:6px">Building something similar?</h2>
-          <p class="muted" style="margin:0">Ask in the YouTube comments, suggest the next video, or email me about collaborations.</p></div>
+          <p class="muted" style="margin:0">{site.videos ? "Ask in the YouTube comments, suggest the next video, or email me about collaborations." : "Questions about a build, an idea for the next one, or a collaboration: email me."}</p></div>
         <div class="btns"><a class="btn blue" href={`mailto:${site.email}`}>Email me</a></div>
       </div>
     </div>

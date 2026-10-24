@@ -1,23 +1,25 @@
 ---
 import Base from "../layouts/Base.astro";
 import Subscribe from "../components/Subscribe.astro";
-import { site } from "../lib/site";
+import { site, canSubscribe } from "../lib/site";
 const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURIComponent(subject)}`;
 ---
-<Base title="Contact" page="contact" description="Get in touch with Midnight Lite: questions about a build, video ideas, collaborations and sponsorships.">
+<Base title="Contact" page="contact" description="Get in touch with Midnight Lite: questions about a build, ideas, collaborations and sponsorships.">
   <section class="page-hero">
     <div class="wrap">
       <p class="eyebrow">Contact</p>
       <h1>Say hello</h1>
-      <p>Questions about a build, an idea for the next video, or a collaboration. Here's where to find me.</p>
+      <p>Questions about a build, an idea for the next one, or a collaboration. Here's where to find me.</p>
     </div>
   </section>
   <section style="padding-top:20px">
     <div class="wrap">
-      <div class="grid c3">
-        <div class="panel" style="border-top:5px solid #e62117"><h3>Ask about a build</h3><p class="muted">Comment under the video. I read and answer them, and other viewers often help too.</p><a class="btn yt small" href={site.youtube}>▶ YouTube</a></div>
-        <div class="panel" style="border-top:5px solid var(--amber)"><h3>Suggest a video</h3><p class="muted">What should I build or explain next? Send me an email with your idea.</p><a class="btn small line" href={mail("Video idea")}>Suggest an idea</a></div>
-        <div class="panel" style="border-top:5px solid var(--blue)"><h3>Get new videos</h3><p class="muted">{site.buttondown ? "New videos and build logs by email, about twice a month." : "Subscribe on YouTube to see new builds first."}</p><Subscribe small /></div>
+      <div class={`grid ${canSubscribe ? "c3" : "c2"}`}>
+        {site.videos
+          ? <div class="panel" style="border-top:5px solid #e62117"><h3>Ask about a build</h3><p class="muted">Comment under the video. I read and answer them, and other viewers often help too.</p><a class="btn yt small" href={site.youtube}>▶ YouTube</a></div>
+          : <div class="panel" style="border-top:5px solid var(--blue)"><h3>Ask about a build</h3><p class="muted">Stuck on something from a build log, or spotted a mistake? Email me with the post and your question.</p><a class="btn small blue" href={mail("Question about a build")}>Ask a question</a></div>}
+        <div class="panel" style="border-top:5px solid var(--amber)"><h3>Suggest a {site.videos ? "video" : "build"}</h3><p class="muted">What should I build or explain next? Send me an email with your idea.</p><a class="btn small line" href={mail(site.videos ? "Video idea" : "Build idea")}>Suggest an idea</a></div>
+        {canSubscribe && <div class="panel" style="border-top:5px solid var(--blue)"><h3>Get new {site.videos ? "videos" : "posts"}</h3><p class="muted">{site.buttondown ? "New build logs by email, about twice a month." : "Subscribe on YouTube to see new builds first."}</p><Subscribe small /></div>}
       </div>
     </div>
   </section>
@@ -25,7 +27,7 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     <div class="wrap" style="max-width:720px">
       <div class="panel" id="email">
         <h3>Email me</h3>
-        <p class="muted">For collaborations, sponsorships, video ideas or anything private.</p>
+        <p class="muted">For collaborations, sponsorships, ideas or anything private.</p>
         <p style="font-size:1.25rem;font-weight:700;margin:14px 0"><a href={`mailto:${site.email}`}>{site.email}</a></p>
         <div class="btns"><a class="btn blue" href={mail("Hello")}>Write an email</a><a class="btn line" href={mail("Collaboration / sponsorship")}>Collaboration or sponsorship</a></div>
       </div>

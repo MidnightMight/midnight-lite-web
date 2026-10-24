@@ -2,11 +2,11 @@
 import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import ProjectCard from "../../components/ProjectCard.astro";
-import { TOPICS } from "../../lib/site";
+import { site, TOPICS } from "../../lib/site";
 
 const projects = (await getCollection("projects", (p) => !p.data.draft)).sort((a, b) => a.data.order - b.data.order);
 const posts = await getCollection("posts", (p) => !p.data.draft);
-const videos = await getCollection("videos", (v) => !!v.data.youtube);
+const videos = await getCollection("videos", (v) => site.videos && !!v.data.youtube);
 const meta = (id: string) => {
   const n = posts.filter((p) => p.data.project === id).length, v = videos.filter((x) => x.data.project === id).length;
   return [v && `▶ ${v} video${v > 1 ? "s" : ""}`, n && `${n} build log${n > 1 ? "s" : ""}`].filter(Boolean).join(" · ") || undefined;

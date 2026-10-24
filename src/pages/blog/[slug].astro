@@ -4,7 +4,7 @@ import Base from "../../layouts/Base.astro";
 import YouTube from "../../components/YouTube.astro";
 import AskOnYouTube from "../../components/AskOnYouTube.astro";
 import Lightbox from "../../components/Lightbox.astro";
-import { TOPICS, fmtDate, readMins } from "../../lib/site";
+import { site, TOPICS, fmtDate, readMins } from "../../lib/site";
 
 export async function getStaticPaths() {
   const posts = (await getCollection("posts", (p) => !p.data.draft)).sort((a, b) => +a.data.date - +b.data.date);
@@ -25,7 +25,7 @@ const project = d.project ? await getEntry("projects", d.project) : undefined;
   <section style="padding-top:20px">
     <div class="wrap" style="max-width:860px">
       <article class="prose">
-        {d.video && <YouTube id={d.video} title={d.title} />}
+        {site.videos && d.video && <YouTube id={d.video} title={d.title} />}
         <Content />
       </article>
       <div class="panel" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:28px 0">
