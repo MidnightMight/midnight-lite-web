@@ -4,7 +4,7 @@ description: How the ride route planner works, the rules it follows, and the pro
 date: 2026-10-24
 topic: web
 cover: /img/uploads/route-planner-desktop.webp
-draft: true
+draft: false
 ---
 
 Most maps apps either send an e-scooter or EUC down a road it isn't allowed on, or have no idea what one is. Bike
