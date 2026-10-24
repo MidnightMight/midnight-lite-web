@@ -337,6 +337,8 @@ const jsonld = [
   .pmd-dirs li.stop button { color: #6b4500; font-weight: 600; }
   #pmd-print tr.stop td { background: #fff6dd; }
   .pmd-dirs .brk, #pmd-print .brk { font-size: 13px; font-weight: 600; color: #8a5a00; margin-top: 4px; }
+  .pmd-style { display: flex; align-items: center; gap: 6px; padding: 3px 6px 3px 8px; background: #fff; font: 600 12px/1 var(--font-body); color: #333; }
+  .pmd-style select { font: inherit; border: 0; background: transparent; color: inherit; padding: 4px 2px; cursor: pointer; }
   .pmd-light { width: 18px; height: 18px; border-radius: 50%; background: #222; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4);
     display: grid; place-items: center; font-size: 10px; line-height: 1; }
   .pmd-rest { display: inline-block; height: 22px; padding: 0 6px; border-radius: 11px; background: #e0a100; border: 2px solid #fff;
@@ -512,9 +514,27 @@ const jsonld = [
       const res = await fetch(TILES_URL, { headers: { Range: "bytes=0-126" }, signal: AbortSignal.timeout(4000) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { leafletLayer } = await import("protomaps-leaflet");
-      const dark = matchMedia("(prefers-color-scheme: dark)").matches;
-      leafletLayer({ url: TILES_URL, flavor: dark ? "dark" : "light", lang: "en", maxZoom: 19,
-        attribution: `${OSM_ATTR} · <a href="https://protomaps.com">Protomaps</a>` }).addTo(map);
+      // map style picker (own tiles only: OSM's raster tiles come in one style). "auto" follows the device's dark mode.
+      const STYLES = [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"], ["grayscale", "Grey"], ["white", "White"], ["black", "Black"]];
+      let base = null;
+      const setStyle = (st) => {
+        const flavor = st === "auto" || !STYLES.some(([k]) => k === st) ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : st;
+        base?.remove();
+        base = leafletLayer({ url: TILES_URL, flavor, lang: "en", maxZoom: 19,
+          attribution: `${OSM_ATTR} · <a href="https://protomaps.com">Protomaps</a>` }).addTo(map);
+        base.bringToBack();
+      };
+      const saved = store.get("ride-map-style") || "auto";
+      setStyle(saved);
+      const picker = L.control({ position: "topright" });
+      picker.onAdd = () => {
+        const box = L.DomUtil.create("label", "leaflet-bar pmd-style");
+        box.innerHTML = `<span>Map</span><select aria-label="Map style">${STYLES.map(([k, t]) => `<option value="${k}"${k === saved ? " selected" : ""}>${t}</option>`).join("")}</select>`;
+        L.DomEvent.disableClickPropagation(box);
+        box.querySelector("select").onchange = (e) => { store.set("ride-map-style", e.target.value); setStyle(e.target.value); };
+        return box;
+      };
+      picker.addTo(map);
     } catch {
       osmTiles();
     }
