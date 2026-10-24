@@ -1,0 +1,4 @@
+# Speed limits people have reported (by email) for roads OpenStreetMap has no limit for.
+# One row covers the untagged parts of the named road within radius_m of the point. Better still, also add
+# maxspeed to the road in OpenStreetMap, so everyone gets it; then the row can go.
+name,lat,lon,radius_m,maxspeed

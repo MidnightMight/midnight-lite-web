@@ -4,7 +4,7 @@ import { site } from "../../lib/site";
 // When the rules below were last checked against the qld.gov.au pages (update after re-checking them).
 const RULES_CHECKED = "24 October 2026";
 // Graph file is built by tools/pmd-graph/build.py from OpenStreetMap; the date in the name is the OSM extract date.
-const GRAPH = { url: "/data/pmd/seq-20261024-v7.bin", date: "24 October 2026" };
+const GRAPH = { url: "/data/pmd/seq-20261024-v7b.bin", date: "24 October 2026" };
 
 // Search: the FAQ below is shown on the page and mirrored in FAQPage structured data (keep the two in step).
 const FAQ = [
@@ -216,7 +216,7 @@ const jsonld = [
       </ul>
       <h2>Questions</h2>
       {FAQ.map(([q, a]) => <details class="pmd-faq"><summary>{q}</summary><p>{a}</p></details>)}
-      <p class="hint">Rules checked {RULES_CHECKED}. Spotted something out of date? Email <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
+      <p class="hint">Rules checked {RULES_CHECKED}. Spotted something out of date, or know a speed limit the map is missing? Email <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
     </div>
   </section>
 </Base>
@@ -407,7 +407,7 @@ const jsonld = [
     ["Bikeway", "#1f9d55"], ["Shared path", "#14a3a3"], ["Footpath", "#e0a100"], ["Quiet street", "#3d7fe0"],
     ["Main road ≤ 60", "#d64545"], ["Road bike lane", "#7b61ff"], ["Crossing", "#8a8f98"], ["Track / unsealed", "#8b5a2b"],
     ["Footpath beside a fast road", "#e0a100"], ["Road over 60 km/h", "#8f1d1d"], ["Bike lane on a fast road", "#b04ad6"],
-    ["Ferry (CityCat etc.)", "#0b3d91"],
+    ["Ferry (CityCat etc.)", "#0b3d91"], ["Main road, limit not mapped", "#e8590c"],
   ];
   const MODES = {
     bike: { label: "bicycles", speed: 22, max: 35, roads: "bikeways", foot: "(give way to pedestrians)" },
@@ -427,6 +427,7 @@ const jsonld = [
       ["Main roads (60 km/h or less)", "yes", "Strongly avoided unless you pick \"Any legal road\"."],
       ["On-road bike lanes (60 km/h or less)", "yes", "Preferred over other roads. Never against traffic."],
       ["Roads over 60 km/h, incl. painted bike lanes", "no", "Never used."],
+      ["Main roads with no speed limit in the map", "maybe", "Last resort only, with a warning: ride them only where signed 60 km/h or less. Know the limit? Email us and we'll add it."],
       ["Bike lanes physically separated from fast roads", "yes", "Used like a bikeway."],
       ["Footpath beside a fast road (not mapped separately)", "yes", "Used as a footpath (12 km/h)."],
       ["Motorways", "no", "Never used."],
@@ -460,7 +461,7 @@ const jsonld = [
     : r[0] === "Shared paths" ? [r[0], r[1], "Preferred. 12 km/h when passing pedestrians."] : r);
   const NOTES = {
     common: [
-      "Speed limits missing from the map are taken from the connected parts of the same road where those are mapped (the higher one if they differ). Otherwise they're guessed: local streets 50 km/h, tertiary roads 60 km/h, bigger roads over 60 km/h. Routes say when they use a road with a guessed limit.",
+      "Speed limits missing from the map are taken from the connected parts of the same road where those are mapped (the higher one if they differ). Otherwise they're guessed: local streets 50 km/h, tertiary roads 60 km/h, bigger roads over 60 km/h. Routes say when they use a road with a guessed limit. Main roads with no limit anywhere in the data are a last resort for PMDs, with a warning to check the signs.",
       "Rest stops get a star rating out of 5 from what OpenStreetMap shows within about 40 m of the route: toilets 1.5⭐, drinking water 1.25⭐, shelter 1⭐, cafe 0.75⭐, picnic table 0.5⭐, bench 0.5⭐, bike repair stand 0.25⭐ (rounded to half stars). It rates facilities, not reviews. Breaks use stops rated 1.5/5⭐ or more; Google Maps parts hand over at the best stop near where a split is needed.",
       "Hills cost extra by ride type (most for bicycles, least for e-bikes); \"Avoid\" also doubles the cost of grades over 8 %.",
     ],
@@ -709,6 +710,12 @@ const jsonld = [
     const body = `Hi, a rule in the ride route planner looks out of date.\n\nRide type: ${MODES[mode].label}\nRules checked: ${root.dataset.checked}\nMap data: ${root.dataset.osm}\nPage: ${location.href}\n\nWhat's changed (and a link to the new rule, if you have one):\n`;
     return `mailto:${root.dataset.email}?subject=${encodeURIComponent("Route planner: rule update")}&body=${encodeURIComponent(body)}`;
   }
+  // email for reporting the speed limit of roads the map has none for (they go into tools/pmd-graph/speed-limits.csv)
+  function speedLink(roads) {
+    const lines = roads.map((u) => `${u.name} near ${u.at[0].toFixed(5)}, ${u.at[1].toFixed(5)} (https://www.openstreetmap.org/?mlat=${u.at[0].toFixed(5)}&mlon=${u.at[1].toFixed(5)}#map=17/${u.at[0].toFixed(5)}/${u.at[1].toFixed(5)})\nSpeed limit (km/h): `).join("\n\n");
+    const body = `Hi, here's the speed limit for a road the ride route planner doesn't know:\n\n${lines}\n\nWhich stretch it covers, or where the sign is (optional):\n`;
+    return `mailto:${root.dataset.email}?subject=${encodeURIComponent(`Route planner: speed limit for ${roads.map((u) => u.name).join(", ")}`)}&body=${encodeURIComponent(body)}`;
+  }
   function setMode(m) {
     mode = m; store.set("ride-mode", m);
     prefs = loadPrefs(m);
@@ -820,10 +827,17 @@ const jsonld = [
 
     const s = r.stats, order = Object.entries(s.byCat).filter(([, m]) => m >= 10).sort((x, y) => y[1] - x[1]); // hide slivers
 
-    const roads = [3, 4, 5, 9, 10].reduce((t, c) => t + (s.byCat[c] || 0), 0);
+    const roads = [3, 4, 5, 9, 10, 12].reduce((t, c) => t + (s.byCat[c] || 0), 0);
     const bikeways = (s.byCat[0] || 0) + (s.byCat[1] || 0) + (s.byCat[5] || 0) + (s.byCat[10] || 0);
     const warn = [];
-    if (s.unknownSpeed > 50) warn.push(`${km(s.unknownSpeed)} on roads with no speed limit in the map data (guessed from the road type). Check the signs.`);
+    const um = (r.unmappedRoads || []).filter((u) => u.metres >= 30);
+    if (um.length) {
+      const names = um.map((u) => esc(u.name)).join(", "), mail = root.dataset.email;
+      warn.push(`${km(s.unmapped)} on ${names}, where the map has no speed limit. ${mode === "pmd"
+        ? "E-scooters and other PMDs may ride it only where it's signed 60 km/h or less; if it's faster, use the footpath or another way. "
+        : "Check the signs. "}Know the limit? Tell us at <a href="${speedLink(um)}">${esc(mail)}</a> and we'll add it.`);
+    }
+    if (s.unknownSpeed - s.unmapped > 50) warn.push(`${km(s.unknownSpeed - s.unmapped)} on roads with a speed limit guessed from the rest of the road or the road type. Check the signs.`);
     if ((s.byCat[9] || 0) > 0) warn.push(`${km(s.byCat[9])} on roads over 60 km/h with no bike lane.`);
     if (s.noBike > 20) warn.push(`${km(s.noBike)} on paths mapped as "no bicycles". PMDs may be allowed, but look for signs.`);
     if (s.contra > 20) warn.push(`${km(s.contra)} against one-way traffic where bicycles are exempt.`);
@@ -894,7 +908,8 @@ const jsonld = [
     if (d.unpaved >= 20) parts.push(`unsealed ${km(d.unpaved)}`);
     if (d.lit >= 0.8 * t.metres && t.metres >= 50) parts.push("lit at night");
     if (d.contra >= 5) parts.push("against one-way traffic (bicycles exempt)");
-    if (d.guess >= 50) parts.push("speed limit not in the map data: check the signs");
+    if (d.unmapped >= 30) parts.push(mode === "pmd" ? "speed limit not mapped: PMDs only if signed 60 km/h or less" : "speed limit not mapped: check the signs");
+    else if (d.guess >= 50) parts.push("speed limit guessed: check the signs");
     if (d.nobike >= 5) parts.push("mapped as \"no bicycles\": look for signs");
     return parts.join(" · ");
   }
@@ -997,7 +1012,7 @@ const jsonld = [
   // and at ferries.
   const GMAPS_STOPS = 9, ANCHOR = 60, PIN_AFTER_TURN = 25, PIN_GAP_MIN = 600, PIN_GAP_MIN_KEY = 250, PIN_GAP_MAX = 2000;
   const HANDOVER_WINDOW = 1000;
-  const ONROAD = new Set([3, 4, 5, 9, 10]);
+  const ONROAD = new Set([3, 4, 5, 9, 10, 12]);
   function googleLegs(r) {
     const P = r.pts, cum = [0];
     for (let i = 1; i < P.length; i++) cum.push(cum[i - 1] + mDist(P[i - 1], P[i]));

@@ -27,3 +27,11 @@ cp out/graph.bin "$R/public/data/pmd/seq-$(date +%Y%m%d)-v7.bin"
 
 Then point `GRAPH` in `src/pages/tools/route-planner.astro` at the new file (with the new date) and delete the old one.
 File names carry the date because `public/_headers` caches them for a year.
+
+## Missing speed limits
+
+Main roads with no `maxspeed` take the limit of the connected parts of the same road (highest wins), and are flagged as
+guessed. Roads with no limit anywhere are treated as over 60 km/h, but PMDs may use them as a last resort with a
+warning, and the page offers a pre-filled email to report the limit. Reported limits go in `speed-limits.csv`
+(name, lat, lon, radius_m, maxspeed: covers the untagged parts of that road within the radius); also add them to
+OpenStreetMap if you've seen the sign, then the row can go after the next rebuild.

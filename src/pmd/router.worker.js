@@ -5,8 +5,9 @@
 // Edge categories and flags: keep in sync with build.py.
 const CAT = { CYCLEWAY: 0, SHARED: 1, FOOTPATH: 2, ROAD_QUIET: 3, ROAD_BIG: 4, ROAD_LANE: 5, CROSSING: 6, TRACK: 7,
   SIDEWALK: 8, ROAD_FAST: 9, ROAD_FAST_LANE: 10, FERRY: 11 };
+const SHOW_UNMAPPED = 12; // display-only category (map colour, legend): main road with no speed limit in the data
 const FERRY_MPS = 18 / 3.6; // CityCat average including stops
-const F_ONEWAY = 1, F_UNPAVED = 2, F_ROUGH = 4, F_NOBIKE = 8, F_SPEED_GUESS = 16, F_LIT = 32, F_CONTRA = 64, F_DISMOUNT = 128, F_SIGNALS = 256;
+const F_ONEWAY = 1, F_UNPAVED = 2, F_ROUGH = 4, F_NOBIKE = 8, F_SPEED_GUESS = 16, F_LIT = 32, F_CONTRA = 64, F_DISMOUNT = 128, F_SIGNALS = 256, F_SPEED_UNKNOWN = 512;
 const LIGHT_SEC = 20; // average wait at a set of traffic lights
 const WALK_KMH = 5;
 const ROADISH = (c) => c === 3 || c === 4 || c === 5 || c === 9 || c === 10;
@@ -99,11 +100,14 @@ function costTable(prefs) {
   mult[CAT.FOOTPATH] *= foot; mult[CAT.SIDEWALK] *= foot;
   if (prefs.surface === "paved") mult[CAT.TRACK] = I; else if (prefs.surface === "good") mult[CAT.TRACK] *= 2;
   if (prefs.mode === "pmd") mult[CAT.ROAD_FAST] = mult[CAT.ROAD_FAST_LANE] = I; // PMDs: never on roads over 60 km/h
+  // ...but a main road with no speed limit anywhere in the data might be 60: PMDs may use it as a last resort (with a
+  // warning to check the signs), unless main roads are off in the Roads option
+  const big = (rows[prefs.roads] || rows.avoid)[CAT.ROAD_BIG], lastResort = big === I ? I : Math.max(big * 2, 8);
   for (let i = 0; i < mult.length; i++) if (mult[i] < 1) mult[i] = 1;
   // hills: metres-of-flat equivalent per metre climbed, by mode and preference
   const hill = { bike: [0, 8, 25], ebike: [0, 3, 10], pmd: [0, 4, 14] }[prefs.mode] || [0, 6, 20];
   const hk = hill[{ ignore: 0, some: 1, avoid: 2 }[prefs.hills] ?? 1];
-  return { mult, hk, steep: prefs.hills === "avoid" };
+  return { mult, hk, steep: prefs.hills === "avoid", lastResort };
 }
 
 function edgeCost(G, e, rev, T, prefs) {
@@ -113,6 +117,7 @@ function edgeCost(G, e, rev, T, prefs) {
     return Math.max(G.len[e], G.len[e] / FERRY_MPS * prefs.speed / 3.6 * 1.1);
   }
   let k = T.mult[c];
+  if (k === Infinity && f & F_SPEED_UNKNOWN && (c === CAT.ROAD_FAST || c === CAT.ROAD_FAST_LANE)) k = T.lastResort;
   if (k === Infinity) return Infinity;
   if (rev & 2 && prefs.mode === "pmd") return Infinity; // contraflow is for bicycles only
   if (f & F_UNPAVED) { if (prefs.surface === "paved") return Infinity; k *= prefs.surface === "good" ? 3 : 1.4; }
@@ -220,12 +225,12 @@ const turnAngle = (from, to) => ((to - from + 540) % 360) - 180;
 function mergeD(a, b) {
   const d = { ...a, cats: { ...a.cats } };
   for (const [c, m] of Object.entries(b.cats)) d.cats[c] = (d.cats[c] || 0) + m;
-  for (const k of ["up", "dn", "sec", "unpaved", "lit", "walk", "guess", "contra", "nobike", "wait", "lights"]) d[k] += b[k];
+  for (const k of ["up", "dn", "sec", "unpaved", "lit", "walk", "guess", "contra", "nobike", "wait", "lights", "unmapped"]) d[k] += b[k];
   d.steep = Math.max(a.steep, b.steep);
   return d;
 }
 // lights: distances along the route of each set of traffic lights
-function directions(segs, total, lights) {
+function directions(segs, total, lights, mode) {
   // 1. fold tiny unnamed connectors (< 25 m) into the previous segment, and join runs with the same name/kind
   const S = [];
   for (const g of segs) {
@@ -272,6 +277,7 @@ function directions(segs, total, lights) {
     if (g.crossings) notes.push(`crosses ${g.crossings} road${g.crossings > 1 ? "s" : ""}`);
     if (passLights) notes.push(`${passLights} set${passLights > 1 ? "s" : ""} of traffic lights`);
     if (notes.length) text += ` (${notes.join(", ")})`;
+    if (mode === "pmd" && g.d.unmapped >= 30) text += ": only if it's signed 60 km/h or less (limit not mapped)";
     out.push({ text, label: g.label, metres: g.metres, at: g.at, idx: g.idx, heading: g.b0, angle, dist: at, cat: g.cat, crossings: g.crossings,
       lightsAtStart: startLights, lightsPassed: passLights, d: g.d });
     at += g.metres;
@@ -323,7 +329,8 @@ function spotsAlong(G, pts) {
 function describe(G, steps, prefs) {
   const pts = [], runs = [], profile = [], segs = [];
   const stats = { metres: 0, seconds: 0, climb: 0, descent: 0, steepest: 0, byCat: {}, unknownSpeed: 0, noBike: 0,
-    unpaved: 0, crossings: 0, contra: 0, ferries: 0, ferryWait: 0, walk: 0, lights: 0 };
+    unpaved: 0, crossings: 0, contra: 0, ferries: 0, ferryWait: 0, walk: 0, lights: 0, unmapped: 0 };
+  const unmapped = new Map(); // roads with no speed limit in the data: name -> {name, at, metres}
   const lights = [], lightAt = []; // distances along the route and positions; lights within 50 m count as one set
   const addLight = (d, p) => {
     if (lights.length && d - lights[lights.length - 1] < 50) return false;
@@ -347,7 +354,8 @@ function describe(G, steps, prefs) {
       b0: bearing(ll[0], ll[1]), b1: bearing(ll[ll.length - 2], ll[ll.length - 1]) });
     const seg = segs[segs.length - 1];
     const last = runs[runs.length - 1];
-    if (last && last.cat === c) last.pts.push(...ll.slice(1)); else runs.push({ cat: c, pts: ll });
+    const dc = f & F_SPEED_UNKNOWN && ROADISH(c) ? SHOW_UNMAPPED : c;
+    if (last && last.cat === dc) last.pts.push(...ll.slice(1)); else runs.push({ cat: dc, pts: ll });
     pts.push(...(pts.length ? ll.slice(1) : ll));
     // speed: 12 km/h on footpaths/crossings for PMDs and e-bikes (law); bicycles get 15 there (pedestrians)
     let sp = SLOWPATH(c) ? Math.min(v, mode === "bike" ? 15 : 12) : v;
@@ -361,8 +369,15 @@ function describe(G, steps, prefs) {
     stats.metres += L; stats.climb += up; stats.descent += dn;
     stats.seconds += L / (sp / 3.6) + up * climbSec + (c === CAT.CROSSING && prevCat !== CAT.CROSSING ? 10 : 0);
     if (L >= 40) stats.steepest = Math.max(stats.steepest, up / L);
-    stats.byCat[c] = (stats.byCat[c] || 0) + L;
+    stats.byCat[dc] = (stats.byCat[dc] || 0) + L;
     if (f & F_SPEED_GUESS && ROADISH(c)) stats.unknownSpeed += L;
+    const um = f & F_SPEED_UNKNOWN && ROADISH(c) ? L : 0;
+    if (um) {
+      stats.unmapped += L;
+      const key = nm || "(unnamed road)";
+      if (!unmapped.has(key)) unmapped.set(key, { name: key, at: ll[Math.floor(ll.length / 2)], metres: 0 });
+      unmapped.get(key).metres += L;
+    }
     if (f & F_NOBIKE) stats.noBike += L;
     if (f & F_UNPAVED) stats.unpaved += L;
     if (rev & 2) stats.contra += L;
@@ -371,9 +386,9 @@ function describe(G, steps, prefs) {
     if (f & F_SIGNALS && !prevSig) lit += addLight(stats.metres - L, ll[0]);
     if (G.sig[rev & 1 ? G.from[e] : G.to[e]]) lit += addLight(stats.metres, ll[ll.length - 1]);
     prevSig = f & F_SIGNALS;
-    seg.d = { cats: { [c]: L }, up, dn, sec: L / (sp / 3.6) + up * climbSec + boarding + (c === CAT.CROSSING && prevCat !== CAT.CROSSING ? 10 : 0), steep: L >= 40 ? up / L : 0,
+    seg.d = { cats: { [dc]: L }, up, dn, sec: L / (sp / 3.6) + up * climbSec + boarding + (c === CAT.CROSSING && prevCat !== CAT.CROSSING ? 10 : 0), steep: L >= 40 ? up / L : 0,
       unpaved: f & F_UNPAVED ? L : 0, lit: f & F_LIT ? L : 0, walk: f & F_DISMOUNT ? L : 0,
-      guess: f & F_SPEED_GUESS && ROADISH(c) ? L : 0, contra: rev & 2 ? L : 0, nobike: f & F_NOBIKE ? L : 0, wait: boarding, lights: lit };
+      guess: f & F_SPEED_GUESS && ROADISH(c) ? L : 0, contra: rev & 2 ? L : 0, nobike: f & F_NOBIKE ? L : 0, wait: boarding, lights: lit, unmapped: um };
     seg.d.sec += lit * LIGHT_SEC;
     if (c === CAT.CROSSING && prevCat !== CAT.CROSSING) stats.crossings++; // one crossing is often several edges
     prevCat = c;
@@ -382,7 +397,8 @@ function describe(G, steps, prefs) {
   // thin the profile to ~300 points for drawing
   const step = Math.max(1, Math.floor(profile.length / 300));
   const prof = profile.filter((_, i) => i % step === 0 || i === profile.length - 1);
-  return { pts, runs, stats, profile: prof, steps: directions(segs, stats.metres, lights), lights: lightAt };
+  return { pts, runs, stats, profile: prof, steps: directions(segs, stats.metres, lights, mode), lights: lightAt,
+    unmappedRoads: [...unmapped.values()] };
 }
 
 self.onmessage = async ({ data }) => {

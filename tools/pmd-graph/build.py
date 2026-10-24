@@ -22,7 +22,7 @@ reads the river or hill under them), then each way's profile is smoothed over ~2
 Usage (tools/pmd-graph/Dockerfile image):
   python3 build.py seq.osm.pbf dem5,dem out/graph.bin
 """
-import glob, gzip, json, math, sys
+import csv, glob, gzip, json, math, os, sys
 import numpy as np
 import osmium
 from osgeo import gdal
@@ -68,7 +68,8 @@ F_SPEED_GUESS = 16  # road speed limit not tagged, inferred from the road class
 F_LIT = 32
 F_CONTRA = 64       # one-way, but bicycles may ride both ways
 F_DISMOUNT = 128
-F_SIGNALS = 256    # crossing controlled by traffic lights    # bicycle=dismount (ferry gangways, campus courts): allowed on foot, pushing the bike/device
+F_SIGNALS = 256    # crossing controlled by traffic lights
+F_SPEED_UNKNOWN = 512  # main road with no speed limit anywhere in the data (PMDs: last resort, with a warning)    # bicycle=dismount (ferry gangways, campus courts): allowed on foot, pushing the bike/device
 
 ROAD_LOCAL = {"living_street", "residential", "service", "unclassified", "road"}
 ROAD_MAIN = {"tertiary", "tertiary_link", "secondary", "secondary_link", "primary", "primary_link", "trunk", "trunk_link"}
@@ -101,7 +102,7 @@ def speed(t, inferred=None):
     if sp is not None:
         return sp, False
     if inferred:
-        return inferred, True   # taken from the connected parts of the same road (still flagged as a guess)
+        return inferred   # (limit, guessed): from speed-limits.csv, or from the connected parts of the same road
     h = t.get("highway")
     if h in ROAD_LOCAL:
         return 50, True
@@ -164,6 +165,8 @@ def classify(t, inferred=None):
     sp, guess = speed(t, inferred)
     if guess:
         flags |= F_SPEED_GUESS
+        if not inferred and h in ROAD_MAIN and h not in ("tertiary", "tertiary_link"):
+            flags |= F_SPEED_UNKNOWN
     if oneway:
         flags |= F_ONEWAY
         if t.get("oneway:bicycle") == "no" or any(str(t.get(k, "")).startswith("opposite") for k in CW_KEYS):
@@ -207,29 +210,48 @@ class MainRoads(osmium.SimpleHandler):
 
     def __init__(self):
         super().__init__()
-        self.roads = {}   # way id -> (name, link, speed or None, first node, last node)
+        self.roads = {}   # way id -> (name, link, speed or None, first node, last node, (lat, lon) of the middle node)
 
     def way(self, w):
         h = w.tags.get("highway")
         if h in ROAD_MAIN and len(w.nodes) >= 2:
-            self.roads[w.id] = (w.tags.get("name", ""), h.endswith("_link"), tagged_speed(w.tags), w.nodes[0].ref, w.nodes[-1].ref)
+            mid = w.nodes[len(w.nodes) // 2].location
+            self.roads[w.id] = (w.tags.get("name", ""), h.endswith("_link"), tagged_speed(w.tags), w.nodes[0].ref, w.nodes[-1].ref,
+                                (mid.lat, mid.lon) if mid.valid() else None)
+
+
+def overrides(path):
+    """speed-limits.csv: limits people have reported for roads the map has none for. Columns: name, lat, lon,
+    radius_m, maxspeed (one row covers the untagged parts of that road within radius_m of the point)."""
+    if not os.path.exists(path):
+        return []
+    with open(path, newline="") as f:
+        return [(r["name"], float(r["lat"]), float(r["lon"]), float(r["radius_m"]), int(r["maxspeed"]))
+                for r in csv.DictReader(line for line in f if not line.startswith("#"))]
 
 
 def infer_speeds(src):
-    """Way id -> speed limit for untagged main roads, spread along same-named connected parts (highest neighbour
-    wins, to stay on the safe side for PMDs). Unnamed slip roads take the highest limit of the roads they join."""
+    """Way id -> (speed limit, guessed) for untagged main roads: reported limits from speed-limits.csv first, then
+    spread along same-named connected parts (highest neighbour wins, to stay on the safe side for PMDs; flagged as
+    guessed). Unnamed slip roads take the highest limit of the roads they join."""
     m = MainRoads()
-    m.apply_file(src)
+    m.apply_file(src, locations=True, idx="flex_mem")
+    reported = {}
+    for name, la, lo, rad, sp in overrides(os.path.join(os.path.dirname(os.path.abspath(__file__)), "speed-limits.csv")):
+        for wid, r in m.roads.items():
+            if r[2] is None and r[0] == name and r[5] and hav(r[5], (la, lo)) <= rad:
+                reported[wid] = sp
     at = {}
-    for wid, (_, _, _, a, b) in m.roads.items():
+    for wid, (_, _, _, a, b, _) in m.roads.items():
         at.setdefault(a, []).append(wid)
         at.setdefault(b, []).append(wid)
     known = {wid: r[2] for wid, r in m.roads.items() if r[2] is not None}
+    known.update(reported)
     todo = [wid for wid in m.roads if wid not in known]
     while True:
         found = {}
         for wid in todo:
-            name, link, _, a, b = m.roads[wid]
+            name, link, _, a, b, _ = m.roads[wid]
             nb = [known[o] for n in (a, b) for o in at[n] if o in known and (m.roads[o][0] == name if name else link)]
             if nb and (name or link):
                 found[wid] = max(nb)
@@ -237,8 +259,8 @@ def infer_speeds(src):
             break
         known.update(found)
         todo = [wid for wid in todo if wid not in found]
-    out = {wid: known[wid] for wid, r in m.roads.items() if r[2] is None and wid in known}
-    print("main roads", len(m.roads), "untagged", len(out) + len(todo), "limit inferred", len(out))
+    out = {wid: (known[wid], wid not in reported) for wid, r in m.roads.items() if r[2] is None and wid in known}
+    print("main roads", len(m.roads), "untagged", len(out) + len(todo), "reported", len(reported), "limit inferred", len(out) - len(reported))
     return out
 
 
