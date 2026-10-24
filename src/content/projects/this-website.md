@@ -2,17 +2,24 @@
 title: This website
 summary: Hand-built HTML in 2024, rebuilt in 2026 around videos and build logs, with every step documented.
 status: in-progress
-topics: [web]
-tags: [Astro]
+topics:
+  - web
+tags:
+  - Astro
+cover: ''
 order: 2
 featured: true
 started: Jan 2024
 skills: Web design, front-end development
 tools: Astro, React, Cloudflare, GitHub Actions
+cost: ''
+video: ''
+link: ''
 files:
   - label: Source on GitHub
     note: The whole site, including this page.
     url: https://github.com/MidnightMight/midnight-lite-web
+draft: false
 ---
 
 ## Why I built it
@@ -30,4 +37,6 @@ I edit content through a small admin editor in the browser, which saves straight
 - **Jan–Feb 2024:** first prototype.
 - **Nov 2024:** main pages deployed.
 - **Jan–Mar 2025:** redesign and new pages; EUC visualiser app.
-- **Oct 2026:** rebuilt around projects, videos and build logs (see the build log below).
+- **Oct 2026**
+    - rebuilt around projects, videos and build logs (see the build log below).
+    -  New tools! Bike, EUC, E-bike, and E-scooter Planner

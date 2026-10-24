@@ -1,21 +1,57 @@
 {
-  "intro": "Online I'm @midnightlite. I make circuits, robots, prints and photos, mostly late at night. Midnight Lite is where I share the whole process so others can learn from it (and from my mistakes).",
+  "intro": "Online I'm @midnightlite. I make circuits, robots, prints and photos, mostly late at night. Midnight Lite is my channel and website where I share the whole process so others can learn from it (and from my mistakes).",
   "skills": [
-    { "title": "Electronics", "text": "PCB design (KiCad), power & USB-C, ESP32, Raspberry Pi, soldering." },
-    { "title": "Software", "text": "Python, JavaScript/React, embedded C, home-server tinkering." },
-    { "title": "Making", "text": "3D printing, CAD, enclosures, robotics." },
-    { "title": "Photography", "text": "Fujifilm X-S10, landscapes and travel, editing." }
+    {
+      "title": "Electronics",
+      "text": "PCB design (KiCad), power & USB-C, ESP32, Raspberry Pi, soldering."
+    },
+    {
+      "title": "Software",
+      "text": "Python, embedded C, home-server tinkering."
+    },
+    {
+      "title": "Making",
+      "text": "3D printing, CAD, enclosures, robotics."
+    },
+    {
+      "title": "Photography",
+      "text": "Fujifilm X-S10, landscapes and travel, editing."
+    }
   ],
   "timeline": [
-    { "when": "2026", "what": "Launching the build log." },
-    { "when": "2026", "what": "First custom PCBs: USB-C power, ferrofluid driver." },
-    { "when": "2025", "what": "Built this website from scratch; EUC World visualiser." }
+    {
+      "when": "2026",
+      "what": "Launching the build log."
+    },
+    {
+      "when": "2026",
+      "what": "First custom PCBs: USB-C power, ferrofluid driver."
+    },
+    {
+      "when": "2025",
+      "what": "Built this website from scratch; EUC World visualiser."
+    }
   ],
   "gear": [
-    { "label": "Camera", "value": "Fujifilm X-S10" },
-    { "label": "3D printer", "value": "Bambu Lab X1C" },
-    { "label": "PCB design", "value": "KiCad 10" },
-    { "label": "Microcontrollers", "value": "ESP32, Raspberry Pi" },
-    { "label": "Home lab", "value": "Self-hosted server, NAS" }
+    {
+      "label": "Camera",
+      "value": "Fujifilm X-S10"
+    },
+    {
+      "label": "3D printer",
+      "value": "Bambu Lab X1C"
+    },
+    {
+      "label": "PCB design",
+      "value": "KiCad 10, Altium"
+    },
+    {
+      "label": "Microcontrollers",
+      "value": "ESP32, Raspberry Pi"
+    },
+    {
+      "label": "Home lab",
+      "value": "Self-hosted server, NAS"
+    }
   ]
 }
