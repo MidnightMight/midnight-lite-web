@@ -509,17 +509,19 @@ const jsonld = [
   const TILES_URL = import.meta.env.PUBLIC_TILES_URL;
   const OSM_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
   const osmTiles = () => L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: OSM_ATTR }).addTo(map);
+  // (the style picker's "OSM classic" uses these too: OpenStreetMap's own servers, only for people who pick it)
   async function ownTiles() {
     try {
       const res = await fetch(TILES_URL, { headers: { Range: "bytes=0-126" }, signal: AbortSignal.timeout(4000) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { leafletLayer } = await import("protomaps-leaflet");
       // map style picker (own tiles only: OSM's raster tiles come in one style). "auto" follows the device's dark mode.
-      const STYLES = [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"], ["grayscale", "Grey"], ["white", "White"], ["black", "Black"]];
+      const STYLES = [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"], ["grayscale", "Grey"], ["white", "White"], ["black", "Black"], ["osm", "OSM classic"]];
       let base = null;
       const setStyle = (st) => {
         const flavor = st === "auto" || !STYLES.some(([k]) => k === st) ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : st;
         base?.remove();
+        if (st === "osm") { base = osmTiles(); base.bringToBack(); return; }
         base = leafletLayer({ url: TILES_URL, flavor, lang: "en", maxZoom: 19,
           attribution: `${OSM_ATTR} · <a href="https://protomaps.com">Protomaps</a>` }).addTo(map);
         base.bringToBack();
