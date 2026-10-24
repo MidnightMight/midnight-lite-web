@@ -23,6 +23,7 @@
     "dayjs": "1.11.23",
     "leaflet": "1.9.4",
     "papaparse": "5.7.0",
+    "protomaps-leaflet": "5.1.0",
     "qrcode": "1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
