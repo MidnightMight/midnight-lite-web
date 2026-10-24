@@ -40,6 +40,8 @@ Uploaded images go to `public/img/uploads/`. The editor converts photos to WebP 
 | Pages and layout | `src/pages/`, `src/layouts/Base.astro`, `src/components/` |
 | Styles (brand tokens) | `src/styles/global.css` |
 | EUC World visualiser (React) | `src/euc/`, page `src/pages/tools/euc-visualiser.astro` |
+| Ride route planner | page `src/pages/tools/route-planner.astro` (UI, rules table, print/PDF, Google Maps links), router `src/pmd/router.worker.js` (A* in a Web Worker) |
+| Route planner map data | `public/data/pmd/seq-*.bin`, built from OpenStreetMap + elevation by `tools/pmd-graph/` (rebuild steps in its README) |
 | Old URL redirects | `public/_redirects` |
 | Layout prototype + review PDFs | `design/` (not part of the build) |
 
@@ -47,6 +49,11 @@ Uploaded images go to `public/img/uploads/`. The editor converts photos to WebP 
 
 - **Contact:** the Contact page just shows the email address from `src/data/site.json` (`email`). No form backend.
 - **Newsletter:** put your Buttondown username in `src/data/site.json` (`buttondown`) or in the editor under *Site settings → Links, socials & newsletter*. While it's empty, the newsletter boxes show a "Subscribe on YouTube" button instead.
+- **Route planner map tiles:** the planner draws OpenStreetMap's public tiles, which aren't meant for heavy use. If
+  they block us, switch to a self-hosted PMTiles file (Protomaps) on Cloudflare R2; a test file is on the NUC in
+  `/srv/pmd-route/tiles/`. Place search uses Photon (komoot), also fair-use.
+- **Route planner rules:** the Queensland rules in the planner were checked on the date in `RULES_CHECKED`
+  (`src/pages/tools/route-planner.astro`). Re-check the qld.gov.au pages every few months and update the date.
 - **New videos:** nothing to do; they're read from the YouTube channel feed on every build. A daily scheduled rebuild (Cloudflare deploy hook) picks them up without a commit.
 
 ## Local development

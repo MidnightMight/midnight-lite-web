@@ -1,5 +1,26 @@
 {
   "tools": [
-    { "title": "EUC World data visualiser", "status": "live", "tags": ["EUC", "Maps & charts"], "text": "Upload an EUC World ride log (CSV) to see your route on a map plus speed, battery and temperature charts.", "url": "/tools/euc-visualiser/", "image": "" }
+    {
+      "title": "Bike & e-scooter route planner (SE Qld)",
+      "status": "live",
+      "tags": [
+        "Bike / e-scooter / EUC",
+        "Maps"
+      ],
+      "text": "Bike, e-bike, e-scooter and EUC routes around Brisbane, Ipswich, Logan, the Gold Coast and Moreton Bay: bikeways first, legal roads only, hills counted.",
+      "url": "/tools/route-planner/",
+      "image": "/img/tools/route-planner.jpg"
+    },
+    {
+      "title": "EUC World data visualiser",
+      "status": "live",
+      "tags": [
+        "EUC",
+        "Maps & charts"
+      ],
+      "text": "Upload an EUC World ride log (CSV) to see your route on a map plus speed, battery and temperature charts.",
+      "url": "/tools/euc-visualiser/",
+      "image": ""
+    }
   ]
 }
