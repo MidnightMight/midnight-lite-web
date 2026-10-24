@@ -1,5 +1,5 @@
 {
-  "intro": "Online I'm @midnightlite. I make circuits, robots, prints and photos, mostly late at night. Midnight Lite is where I share the whole process so others can learn from it (and from my mistakes).",
+  "intro": "Online I'm @midnightlite. I make circuits, robots, prints and photos, mostly late at night. Midnight Lite is my channel and website where I share the whole process so others can learn from it (and from my mistakes).",
   "skills": [
     {
       "title": "Electronics",
@@ -7,7 +7,7 @@
     },
     {
       "title": "Software",
-      "text": "Python, JavaScript/React, embedded C, home-server tinkering."
+      "text": "Python, embedded C, home-server tinkering."
     },
     {
       "title": "Making",
